@@ -29,7 +29,7 @@ public class EntityEvent
 	 */
 	public Point.Double movedFrom()
 	{
-		return(source.lastPoint());
+		return(new Point.Double(source.lastX(),source.lastY()));
 	}
 	
 	/**
@@ -38,7 +38,7 @@ public class EntityEvent
 	 */
 	public Point.Double movedTo()
 	{
-		return(source.point());
+		return(new Point.Double(source.x(),source.y()));
 	}
 	
 	/**

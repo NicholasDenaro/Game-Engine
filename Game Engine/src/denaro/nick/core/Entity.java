@@ -17,14 +17,13 @@ public abstract class Entity extends Identifiable
 	 * @param sprite - the sprite for the entity
 	 * @param point - the position to set the entity at
 	 */
-	public Entity(Sprite sprite, Point.Double point)
+	public Entity(Sprite sprite, double x, double y)
 	{
 		this.sprite=sprite;
-		if(point!=null)
-			this.point=point;
-		else
-			this.point=new Point.Double(0,0);
-		this.lastPoint=new Point.Double(this.point.x,this.point.y);
+		this.x=x;
+		this.y=y;
+		this.lastX=x;
+		this.lastY=y;
 		if(sprite!=null)
 		{
 			Rectangle.Double rect=new Rectangle.Double(-sprite.anchor().x,-sprite.anchor().y,this.sprite.width(),this.sprite.height());
@@ -61,7 +60,7 @@ public abstract class Entity extends Identifiable
 		if(loc!=null)
 			af.translate(loc.x,loc.y);
 		else
-			af.translate(point.x,point.y);
+			af.translate(this.x,this.y);
 		Area myarea=mask.createTransformedArea(af);
 		
 		
@@ -71,13 +70,14 @@ public abstract class Entity extends Identifiable
 	
 	/**
 	 * Checks if there is a collision between 2 entities
-	 * @param loc - temporarily moves the entity to this location to check for a collision
+	 * @param x - temporarily moves the entity to this location to check for a collision
+	 * @param y - temporarily moves the entity to this location to check for a collision
 	 * @param other - the entity to check a collision with
 	 * @return - true if the area boundaries overlap
 	 */
-	public boolean collision(Point.Double loc, Entity other)
+	public boolean collision(double x, double y, Entity other)
 	{
-		
+		Point.Double loc=new Point.Double(x,y);
 		/*AffineTransform af=new AffineTransform();
 		if(loc!=null)
 			af.translate(loc.x,loc.y);
@@ -86,7 +86,7 @@ public abstract class Entity extends Identifiable
 		Area myarea=mask.createTransformedArea(af);*/
 		
 		AffineTransform af=new AffineTransform();
-		af.translate(other.point.x,other.point.y);
+		af.translate(other.x,other.y);
 		Area otherarea=other.mask.createTransformedArea(af);
 		
 		/*myarea.intersect(otherarea);
@@ -96,11 +96,12 @@ public abstract class Entity extends Identifiable
 	
 	/**
 	 * Checks if there is a collision between this entity and the entities in the list
-	 * @param loc - temporarily moves the entity to this location to check for a collision
+	 * @param x - temporarily moves the entity to this location to check for a collision
+	 * @param y - temporarily moves the entity to this location to check for a collision
 	 * @param others - a list of entities to check collisions with
 	 * @return - true if any of the entities collide with this entity
 	 */
-	public boolean collision(Point.Double loc, ArrayList<Entity> others)
+	public boolean collision(double x, double y, ArrayList<Entity> others)
 	{
 		//Rectangle2D.Double mybounds=new Rectangle2D.Double(point.x-sprite.origin().x,point.y-sprite.origin().y,sprite.width(),sprite.height());
 		//Rectangle2D.Double otherbounds;
@@ -109,7 +110,7 @@ public abstract class Entity extends Identifiable
 			if(other!=this)
 			{
 				//otherbounds=new Rectangle2D.Double(other.point.x-other.sprite.origin().x,other.point.y-other.sprite.origin().y,other.sprite.width(),other.sprite.height());
-				if(collision(loc,other))
+				if(collision(x,y,other))
 					return(true);
 			}
 		}
@@ -132,11 +133,13 @@ public abstract class Entity extends Identifiable
 	 */
 	public void depth(int depth)
 	{
-		lastDepth=depth;
+		lastDepth=this.depth;
 		this.depth=depth;
 		EntityEvent event=new EntityEvent(this);
-		for(EntityListener listener:listeners)
-			listener.EntityMove(event);
+		if(lastDepth!=this.depth)
+			for(EntityListener listener:listeners)
+				listener.entityDepthChange(event);
+		
 	}
 	
 	/**
@@ -146,7 +149,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public double direction(Entity other)
 	{
-		return(Math.atan2(point.y-other.point.y,point.x-other.point.x));
+		return(Math.atan2(other.y-this.y,other.x-this.x));
 	}
 	
 	/**
@@ -186,12 +189,21 @@ public abstract class Entity extends Identifiable
 	}
 	
 	/**
-	 * The accessor for the entity's last position
+	 * The accessor for the entity's last horizontal position
 	 * @return - The Entity's last position
 	 */
-	public Point.Double lastPoint()
+	public double lastX()
 	{
-		return(lastPoint);
+		return(lastX);
+	}
+	
+	/**
+	 * The accessor for the entity's last vertical position
+	 * @return - The Entity's last position
+	 */
+	public double lastY()
+	{
+		return(lastY);
 	}
 	
 	/**
@@ -227,28 +239,40 @@ public abstract class Entity extends Identifiable
 	 * Moves the player to the location p
 	 * @param p - the location to move to
 	 */
-	public void move(Point.Double p)
+	private void move(Point.Double p)
 	{
-		lastPoint.setLocation(point.x,point.y);
-		point.setLocation(p);
+		lastX=x;
+		lastY=y;
+		x=p.x;
+		y=p.y;
 		//AffineTransform af=new AffineTransform();
 		//af.setToTranslation(point.x-lastPoint.x,point.y-lastPoint.y);
 		//mask.transform(af);
 		EntityEvent event=new EntityEvent(this);
 		for(EntityListener listener:listeners)
-			listener.EntityMove(event);
+			listener.entityMove(event);
 	}
 	
 	/**
 	 * Shifts the location of the player by p
 	 * @param p - the change in position
 	 */
-	public void moveDelta(Point.Double p)
+	private void moveDelta(Point.Double p)
 	{
-		Point.Double to=new Point.Double(point.x+p.x,point.y+p.y);
+		Point.Double to=new Point.Double(this.x+p.x,this.y+p.y);
 		move(to);
 	}
 	
+	/**
+	 * Shifts the location of the player by p
+	 * @param x - the change in x position
+	 * @param y - the change in y position
+	 */
+	public void moveDelta(double x, double y)
+	{
+		Point.Double to=new Point.Double(this.x+x,this.y+y);
+		move(to);
+	}
 	
 	/**
 	 * The accessor for this entity's sprite offset
@@ -261,20 +285,30 @@ public abstract class Entity extends Identifiable
 	
 	/**
 	 * The setter for this entity's sprite offset
-	 * @param point - the point to set the sprite's offset
+	 * @param x - the horizontal point to set the sprite's offset
+	 * @param y - the vertical point to set the sprite's offset
 	 */
-	public void offset(Point.Double point)
+	public void offset(double x, double y)
 	{
-		offset=point;
+		offset=new Point.Double(x,y);
 	}
 	
 	/**
-	 * The accessor for the entity's current position
+	 * The accessor for the entity's current horizontal position
 	 * @return - A copy of the Entity's position
 	 */
-	public Point.Double point()
+	public double x()
 	{
-		return(new Point.Double(point.x,point.y));
+		return(x);
+	}
+	
+	/**
+	 * The accessor for the entity's current vertical position
+	 * @return - A copy of the Entity's position
+	 */
+	public double y()
+	{
+		return(y);
 	}
 	
 	/**
@@ -318,7 +352,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public abstract void tick();
 	
-	/** A list of all the listeners that are currenlty listening to this object*/
+	/** A list of all the listeners that are currently listening to this object*/
 	private ArrayList<EntityListener> listeners;
 	
 	/** The index of the current sprite*/
@@ -327,14 +361,20 @@ public abstract class Entity extends Identifiable
 	/** The offset at which to draw the image.*/
 	private Point.Double offset;
 	
-	/** The point that stores the entity's location*/
-	private Point.Double point;
+	/** The horizontal component of the entity's location*/
+	private double x;
+	
+	/** The vertical component of the entity's location*/
+	private double y;
 	
 	/** The last depth of the entity*/
 	private int lastDepth;
 	
-	/** The point that stores the entity's last location*/
-	private Point.Double lastPoint;
+	/** The last horizontal component of the entity's last location*/
+	private double lastX;
+	
+	/** The last vertical component of the entity's last location*/
+	private double lastY;
 	
 	/** The depth of the entity*/
 	private int depth;

@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import denaro.nick.core.Sprite;
 
 public class Main
 {
-	/*public static void main(String[] args)
+	public static void main(String[] args)
 	{
 		JFrame frame=new JFrame("Game");
 		frame.setResizable(false);
@@ -73,24 +74,24 @@ public class Main
 		Sprite cyanBall=new Sprite("Earth",img,20,20,new Point(10,10));
 		
 		Entity sun=new Orbital(orangeBall,new Point.Double(160,160),100,new Point.Double(0,0));
-		testRoom.addEntity(sun);
+		engine.addEntity(sun,testRoom);
 		
 		Entity orbital1=new Orbital(redBall,new Point.Double(112,80),1,new Point.Double(0,1.5));
-		testRoom.addEntity(orbital1);
+		engine.addEntity(orbital1,testRoom);
 		
 		orbital1=new Orbital(redBall,new Point.Double(112,96),1,new Point.Double(0,1.8));
-		testRoom.addEntity(orbital1);
+		engine.addEntity(orbital1,testRoom);
 		
 		orbital1=new Orbital(redBall,new Point.Double(192,93),1,new Point.Double(0,0.89));
-		testRoom.addEntity(orbital1);
+		engine.addEntity(orbital1,testRoom);
 		
 		orbital1=new Orbital(redBall,new Point.Double(150,50),1,new Point.Double(-0.8,0.2));
-		testRoom.addEntity(orbital1);
+		engine.addEntity(orbital1,testRoom);
 
 		
 		Entity orbital2=new Orbital(cyanBall,new Point.Double(60,95),3,new Point.Double(0,0.99));
-		testRoom.addEntity(orbital2);
-	}*/
+		engine.addEntity(orbital2,testRoom);
+	}
 }
 
 
@@ -98,7 +99,7 @@ class Orbital extends Entity
 {
 	public Orbital(Sprite sprite, Double point, double mass, Point.Double velocity)
 	{
-		super(sprite,point);
+		super(sprite,point.x,point.y);
 		this.mass=mass;
 		this.center=new Point.Double(point.x,point.y);
 		this.velocity=velocity;
@@ -114,16 +115,17 @@ class Orbital extends Entity
 			Orbital orbital=(Orbital)entity;
 			if(orbital!=this)
 			{
-				double slope=Math.atan2((orbital.point().y-point().y),orbital.lastPoint().x-point().x);
-				acceleration.x+=G*Math.cos(slope)*orbital.mass/Math.pow(point().distance(orbital.lastPoint()),2);
-				acceleration.y+=G*Math.sin(slope)*orbital.mass/Math.pow(point().distance(orbital.lastPoint()),2);
+				double slope=Math.atan2((orbital.y()-y()),orbital.lastX()-x());
+				double distance=new Point2D.Double(x(),y()).distance(new Point2D.Double(orbital.lastX(),orbital.lastY()));
+				acceleration.x+=G*Math.cos(slope)*orbital.mass/Math.pow(distance,2);
+				acceleration.y+=G*Math.sin(slope)*orbital.mass/Math.pow(distance,2);
 			}
 		}
 		velocity.x+=acceleration.x;
 		velocity.y+=acceleration.y;
 		if(mass<100)
 		{
-			move(point().x+velocity.x,point().y+velocity.y);
+			moveDelta(velocity.x,velocity.y);
 		}
 		acceleration=new Point.Double(0,0);
 	}

@@ -19,9 +19,9 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 		super(title);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setResizable(false);
-		this.setFocusable(true);
-		this.requestFocus();
-		this.addKeyListener(engine);
+		this.setFocusable(false);
+		//this.requestFocus();
+		//this.addKeyListener(engine);
 		this.addFocusListener(this);
 		
 		buildFrame(engine);
@@ -42,6 +42,8 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 		c.setLayout(new BorderLayout());
 		c.add(currentPanel,BorderLayout.CENTER);
 		
+		currentPanel.requestFocusInWindow();
+		
 		pack();
 	}
 	
@@ -58,6 +60,8 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 		c.setLayout(new BorderLayout());
 		c.add(currentPanel,BorderLayout.CENTER);
 		
+		currentPanel.requestFocusInWindow();
+		
 		pack();
 		
 	}
@@ -73,7 +77,7 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 	public void focusLost(FocusEvent event)
 	{
 		if(event.getOppositeComponent()!=null)
-			this.requestFocus();
+			currentPanel.requestFocusInWindow();
 	}
 	
 	private JPanel currentPanel;

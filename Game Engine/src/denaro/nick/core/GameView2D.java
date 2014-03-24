@@ -63,8 +63,8 @@ public class GameView2D extends GameView
 				for(Entity entity:entitiesAtDepth)
 				{
 					Sprite sprite=entity.sprite();
-					double x=entity.point().x-sprite.anchor().x+entity.offset().x;
-					double y=entity.point().y-sprite.anchor().y+entity.offset().y;
+					double x=entity.x()-sprite.anchor().x+entity.offset().x;
+					double y=entity.y()-sprite.anchor().y+entity.offset().y;
 					g.drawImage(entity.image(),(int)x,(int)y,null);
 				}
 		}

@@ -1,5 +1,7 @@
 package denaro.nick.core;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +79,33 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	/**
+	 * The accessor for the entities at a specified point of the specified class in this locaiton
+	 * @param x - the horizontal position to check at.
+	 * @param y - the vertical position to check at.
+	 * @param c - the class of the entity to add to the list.
+	 * @return - all of the entities in this Location
+	 */
+	public ArrayList<Entity> entitiesAtPoint(double x, double y, Class c)
+	{
+		ArrayList<Entity> allEntities=new ArrayList<Entity>();
+		for(Integer key:entitiesByDepth.keySet())
+		{
+			ArrayList<Entity> entities=entitiesByDepth.get(key);
+			for(Entity entity:entities)
+			{
+				Area temp=new Area(entity.mask());
+				temp.transform(AffineTransform.getTranslateInstance(entity.x(),entity.y()));
+				if(temp.contains(x,y))
+				{
+					if(c.isAssignableFrom(entity.getClass()))
+						allEntities.add(entity);
+				}
+			}
+		}
+		return(allEntities);
+	}
+	
+	/**
 	 * Returns the layers of the background in this location
 	 * @return - all the layers for the background
 	 */
@@ -108,13 +137,22 @@ public class Location extends Identifiable implements EntityListener
 		for(ArrayList<Entity> entities:entitiesByDepth.values())
 			for(Entity entity:entities)
 				entity.tick();
+		
+		for(Pair<Entity,Pair<Integer,Integer>> pair:addEntitiesDepthQueue)
+		{
+			entitiesByDepth.get(pair.second().first()).remove(pair.first());
+			if(!entitiesByDepth.containsKey(pair.second().second()))
+				entitiesByDepth.put(pair.second().second(),new ArrayList<Entity>());
+			entitiesByDepth.get(pair.second().second()).add(pair.first());
+		}
+		addEntitiesDepthQueue.clear();
 	}
 	
 	/**
 	 * This method does nothing
 	 */
 	@Override
-	public void EntityMove(EntityEvent event)
+	public void entityMove(EntityEvent event)
 	{
 		//do nothing
 	}
@@ -123,16 +161,17 @@ public class Location extends Identifiable implements EntityListener
 	 * Changes the entity's location in the list by depth
 	 */
 	@Override
-	public void EntityDepthChange(EntityEvent event)
+	public void entityDepthChange(EntityEvent event)
 	{
-		entitiesByDepth.get(event.fromDepth()).remove(event.source());
-		entitiesByDepth.get(event.toDepth()).add(event.source());
+		addEntitiesDepthQueue.add(new Pair<Entity,Pair<Integer,Integer>>(event.source(),new Pair<Integer,Integer>(event.fromDepth(),event.toDepth())));
 	}
 	
 	
 	
 	/** Stores all the entities by their depth*/
 	private HashMap<Integer,ArrayList<Entity>> entitiesByDepth;
+	
+	private ArrayList<Pair<Entity,Pair<Integer,Integer>>> addEntitiesDepthQueue=new ArrayList<Pair<Entity,Pair<Integer,Integer>>>();;
 	
 	/**	Stores the layers background image for the location*/
 	private HashMap<Integer,BufferedImage> backgroundLayers;

@@ -1,77 +1,41 @@
 package denaro.nick.core;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
-public class Controller implements KeyListener, MouseListener
+public abstract class Controller
 {
 	/**
 	 * Constructs a controller with specified engine
 	 * @param engine - the engine this controller sends messages to
 	 */
-	public Controller(GameEngine engine)
+	public Controller()
 	{
-		this.engine=engine;
-		engine.view().addKeyListener(this);
-		engine.view().addMouseListener(this);
+		listeners=new ArrayList<ControllerListener>();
 	}
 	
-	@Override
-	public void mouseClicked(MouseEvent event)
+	public abstract void init(GameEngine engine);
+	
+	public void actionPerformed(ControllerEvent event)
 	{
-		//TODO Auto-generated method stub
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent event)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent event)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mousePressed(MouseEvent event)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent event)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyPressed(KeyEvent event)
-	{
-		engine.keyPressed(event);
-	}
-
-	@Override
-	public void keyReleased(KeyEvent event)
-	{
-		engine.keyReleased(event);
-	}
-
-	@Override
-	public void keyTyped(KeyEvent event)
-	{
-		// TODO Auto-generated method stub
-		
+		for(ControllerListener listener:listeners)
+			listener.actionPerformed(event);
 	}
 	
-	/** The game engine this controller talks to*/
-	private GameEngine engine;
+	public void addControllerListener(ControllerListener listener)
+	{
+		if(!listeners.contains(listener))
+			listeners.add(listener);
+	}
 	
+	public void removeControllerListener(ControllerListener listener)
+	{
+		listeners.remove(listener);
+	}
+	
+	protected ArrayList<ControllerListener> listeners()
+	{
+		return(listeners);
+	}
+	
+	private ArrayList<ControllerListener> listeners;
 }

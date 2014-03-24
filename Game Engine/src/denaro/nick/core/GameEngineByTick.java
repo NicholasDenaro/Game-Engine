@@ -1,8 +1,12 @@
 package denaro.nick.core;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+
+import denaro.nick.controllertest.XBoxControllerListener;
+import denaro.nick.controllertest.XBoxButtonEvent;
 
 public class GameEngineByTick extends GameEngine
 {
@@ -21,7 +25,18 @@ public class GameEngineByTick extends GameEngine
 
 		entityRemoveQueue=new ArrayList<Pair<Entity,Location>>();
 		
-		keyEventQueue=new ArrayList<Pair<Focusable, KeyEvent>>();
+		inputEventQueue=new ArrayList<Pair<ControllerListener, ControllerEvent>>();
+	}
+	
+	@Override
+	public void actionPerformed(ControllerEvent event)
+	{
+		//TODO make this work =)
+		if(currentFocus()!=null)
+		if(currentFocus() instanceof ControllerListener)
+		{
+			inputEventQueue.add(new Pair<ControllerListener,ControllerEvent>((ControllerListener)this.currentFocus(),event));
+		}
 	}
 	
 	/**
@@ -70,13 +85,53 @@ public class GameEngineByTick extends GameEngine
 	@Override
 	public void run()
 	{
-		long time=0;
+		long startSecond=0;
 		long timeTick=0;
 		long timeFrame=0;
+		long time=0;
+		long wait=0;
+		long leftover=0;
+		tpsAVG=1;
 		
 		running=true;
 		try
 		{
+			//startSecond=System.currentTimeMillis();
+			/*while(running)
+			{
+				//ticks and frames
+				elapsedTime=0;
+				time=System.nanoTime();
+				tick();
+				totalTicks++;
+				redraw();
+				totalFrames++;
+				elapsedTime+=System.nanoTime()-time;
+				
+				//wait if there is still time left
+				time=System.nanoTime();
+				wait=NANOSECOND/ticksPerSecond-elapsedTime;
+				while(wait>0)
+				{
+					long waiter=System.nanoTime();
+					sleep((long)(wait/(NANOSECOND/MILLISECOND)),(int)(wait%(NANOSECOND/MILLISECOND)));
+					//calculate if we waited too long or too little, adding it to the beginning
+					leftover=-(System.nanoTime()-waiter-wait);
+					wait=leftover;
+				}
+				
+				//if it has been a second, calculate the number of ticks that happened
+				if(System.currentTimeMillis()-startSecond>MILLISECOND)
+				{
+					startSecond=System.currentTimeMillis();
+					//System.out.println("tps: "+totalTicks);
+					totalTicks=0;
+				}
+				
+				//try to average the ticks per second
+				elapsedTime+=System.nanoTime()-time;
+				tpsAVG=tpsAVG*0.9+elapsedTime*0.1;
+			}*/
 			while(running)
 			{
 				time=System.nanoTime();
@@ -102,6 +157,7 @@ public class GameEngineByTick extends GameEngine
 				elapsedTime+=time;
 				timeTick+=time;
 				timeFrame+=time;
+				
 				if(elapsedTime>NANOSECOND*2)
 				{
 					elapsedTime-=NANOSECOND;
@@ -112,31 +168,48 @@ public class GameEngineByTick extends GameEngine
 		}
 		catch(InterruptedException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			running=false;
 		}
 	}
 	
-	@Override
+	/*@Override
 	public void keyPressed(KeyEvent event)
 	{
 		if(currentFocus() instanceof KeyListener)
 		{
-			keyEventQueue.add(new Pair<Focusable, KeyEvent>(currentFocus(),event));
+			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
 		}
 			//((KeyListener)currentFocus()).keyPressed(event);
-		keyPressed(event.getKeyCode());
+		//keyPressed(event.getKeyCode());
 	}
 
 	@Override
 	public void keyReleased(KeyEvent event)
 	{
 		if(currentFocus() instanceof KeyListener)
-			keyEventQueue.add(new Pair<Focusable, KeyEvent>(currentFocus(),event));
+			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
 			//((KeyListener)currentFocus()).keyReleased(event);
-		keyReleased(event.getKeyCode());
+		//keyReleased(event.getKeyCode());
 	}
+	
+	public void buttonPressed(XBoxEvent event)
+	{
+		if(currentFocus() instanceof XBoxControllerListener)
+			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
+	}
+	
+	public void buttonReleased(XBoxEvent event)
+	{
+		if(currentFocus() instanceof XBoxControllerListener)
+			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
+	}
+	
+	public void analogMoved(XBoxEvent event)
+	{
+		if(currentFocus() instanceof XBoxControllerListener)
+			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
+	}*/
 
 	/** 
 	 * progresses the game 1 tick
@@ -148,21 +221,44 @@ public class GameEngineByTick extends GameEngine
 			currentLocation.tick();
 		
 		//key presses
-		if(!keyEventQueue.isEmpty())
+		if(!inputEventQueue.isEmpty())
 		{
-			for(int i=0;i<keyEventQueue.size();i++)
+			//System.out.println("queue size: "+inputEventQueue.size());
+			ArrayList<Pair<ControllerListener,ControllerEvent>> tempQueue=new ArrayList<Pair<ControllerListener,ControllerEvent>>();
+			int size=inputEventQueue.size();
+			for(int i=0;i<size;i++)
+				if(inputEventQueue.get(i)!=null)
+					tempQueue.add(inputEventQueue.get(i));
+			inputEventQueue.clear();
+			for(int i=0;i<tempQueue.size();i++)
 			{
-				Pair<Focusable, KeyEvent> pair=keyEventQueue.get(i);
-				if(pair.second().getID()==KeyEvent.KEY_PRESSED)
+				Pair<ControllerListener, ControllerEvent> pair=tempQueue.get(i);
+				if(pair.first()==null)
 				{
-					((KeyListener)pair.first()).keyPressed(pair.second());
+					//breakpoint!!!
+					i--;
+					i++;
 				}
-				if(pair.second().getID()==KeyEvent.KEY_RELEASED)
+				pair.first().actionPerformed(pair.second());
+				/*if(pair.second() instanceof KeyEvent)
 				{
-					((KeyListener)pair.first()).keyReleased(pair.second());
+					KeyEvent event=(KeyEvent)pair.second();
+					if(event.getID()==KeyEvent.KEY_PRESSED)
+						((KeyListener)pair.first()).keyPressed(event);
+					else if(event.getID()==KeyEvent.KEY_RELEASED)
+						((KeyListener)pair.first()).keyReleased(event);
 				}
+				if(pair.second() instanceof XBoxEvent)
+				{
+					XBoxEvent event=(XBoxEvent)pair.second();
+					if(event.getEventType()==XBoxEvent.BUTTON_PRESSED)
+						((XBoxControllerListener)pair.first()).buttonPressed(event);
+					else if(event.getEventType()==XBoxEvent.BUTTON_RELEASED)
+						((XBoxControllerListener)pair.first()).buttonReleased(event);
+					else if(event.getEventType()==XBoxEvent.ANALOG_MOVED)
+						((XBoxControllerListener)pair.first()).analogMoved(event);
+				}*/
 			}
-			keyEventQueue.clear();
 		}
 		
 		//perform the EngineActions!
@@ -223,8 +319,9 @@ public class GameEngineByTick extends GameEngine
 	public ArrayList<String> information()
 	{
 		ArrayList<String> string=new ArrayList<String>();
-		string.add("tps: "+(int)(0.5+totalTicks*1.0/(elapsedTime*1.0/this.NANOSECOND)));
-		string.add("fps: "+(int)(0.5+totalFrames*1.0/(elapsedTime*1.0/this.NANOSECOND)));
+		//string.add("tps: "+(int)(0.5+1.0/tpsAVG*NANOSECOND));
+		string.add("tps: "+(int)(0.5+totalTicks*1.0/(elapsedTime*1.0/NANOSECOND)));
+		string.add("fps: "+(int)(0.5+totalFrames*1.0/(elapsedTime*1.0/NANOSECOND)));
 		
 		return (string);
 	}
@@ -244,7 +341,7 @@ public class GameEngineByTick extends GameEngine
 	private ArrayList<Pair<Entity,Location>> entityAddQueue;
 	private ArrayList<Pair<Entity,Location>> entityRemoveQueue;
 	
-	private ArrayList<Pair<Focusable,KeyEvent>> keyEventQueue;
+	private ArrayList<Pair<ControllerListener,ControllerEvent>> inputEventQueue;
 	
 	public static final long NANOSECOND=1000000000;
 	public static final long MILLISECOND=1000;
@@ -255,4 +352,6 @@ public class GameEngineByTick extends GameEngine
 	private int totalFrames;
 	private int totalTicks;
 	private long elapsedTime;
+	
+	private double tpsAVG;
 }

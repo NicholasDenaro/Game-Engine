@@ -5,8 +5,17 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public abstract class GameEngine extends Thread implements KeyListener
+import denaro.nick.controllertest.XBoxControllerListener;
+import denaro.nick.controllertest.XBoxButtonEvent;
+
+public abstract class GameEngine extends Thread implements ControllerListener
 {
+	
+	public void controller(Controller controller)
+	{
+		controller.init(this);
+	}
+	
 	public boolean hasActions()
 	{
 		return(!actions.isEmpty());
@@ -47,10 +56,15 @@ public abstract class GameEngine extends Thread implements KeyListener
 	 * Adds the specified listener to the keyListeners
 	 * @param listener - the Listener to be added.
 	 */
-	public void addKeyListener(KeyListener listener)
+	/*public void addKeyListener(KeyListener listener)
 	{
 		if(!keyListeners.contains(listener))
 			keyListeners.add(listener);
+	}*/
+	public void addControllerListener(ControllerListener listener)
+	{
+		if(!controllerListeners.contains(listener))
+			controllerListeners.add(listener);
 	}
 	
 	/**
@@ -105,47 +119,55 @@ public abstract class GameEngine extends Thread implements KeyListener
 		return(keys[keyCode]);
 	}
 	
-	
 	/**
 	 * Assigns the specified key as pressed
 	 * @param keyCode - The key to assign to pressed
 	 */
-	public void keyPressed(int keyCode)
+	/*public void keyPressed(int keyCode)
 	{
 		keys[keyCode]=true;
-	}
+	}*/
 	
 	/**
 	 * Assigns the specified key as released
 	 * @param keyCode - The key to assign to released
 	 */
-	public void keyReleased(int keyCode)
+	/*public void keyReleased(int keyCode)
 	{
 		keys[keyCode]=false;
-	}
+	}*/
 	
-	@Override
-	public void keyPressed(KeyEvent event)
+	/*public void keyPressed(KeyEvent event)
 	{
 		if(currentFocus instanceof KeyListener)
 			((KeyListener)currentFocus).keyPressed(event);
-		keyPressed(event.getKeyCode());
+		//keyPressed(event.getKeyCode());
 	}
 
-	@Override
 	public void keyReleased(KeyEvent event)
 	{
 		if(currentFocus instanceof KeyListener)
 			((KeyListener)currentFocus).keyReleased(event);
-		keyReleased(event.getKeyCode());
+		//keyReleased(event.getKeyCode());
 	}
-
-	@Override
-	public void keyTyped(KeyEvent event)
+	
+	public void buttonPressed(XBoxEvent event)
 	{
-		// TODO Auto-generated method stub
-		
+		if(currentFocus instanceof XBoxControllerListener)
+			((XBoxControllerListener)currentFocus).buttonPressed(event);
 	}
+	
+	public void buttonReleased(XBoxEvent event)
+	{
+		if(currentFocus instanceof XBoxControllerListener)
+			((XBoxControllerListener)currentFocus).buttonReleased(event);
+	}
+	
+	public void analogMoved(XBoxEvent event)
+	{
+		if(currentFocus instanceof XBoxControllerListener)
+			((XBoxControllerListener)currentFocus).analogMoved(event);
+	}*/
 	
 	/**
 	 * The accessor for currentLocaiton
@@ -194,10 +216,6 @@ public abstract class GameEngine extends Thread implements KeyListener
 			listener.viewChanged(view);
 	}
 	
-	
-	/** The controller that the game has.*/
-	protected Controller controller;
-	
 	/** The current view that the game has.*/
 	protected GameView currentView;
 	
@@ -208,13 +226,13 @@ public abstract class GameEngine extends Thread implements KeyListener
 	private static GameEngine engine;
 	
 	/** A list of all the KeyListeners*/
-	private ArrayList<KeyListener> keyListeners=new ArrayList<KeyListener>();
+	private ArrayList<ControllerListener> controllerListeners=new ArrayList<ControllerListener>();
 	
 	/** The current KeyListener that has focus*/
 	private Focusable currentFocus;
 	
 	/** An array of the key states*/
-	private boolean[] keys=new boolean[KeyEvent.KEY_LAST+1];
+	private boolean[] keys;
 	
 	/** A list of the actions to be taken by the engine*/
 	private LinkedList<EngineAction> actions=new LinkedList<EngineAction>();
