@@ -1,4 +1,4 @@
-package denaro.nick.core;
+package denaro.nick.core.entity;
 
 import java.awt.Image;
 import java.awt.Point;
@@ -9,6 +9,9 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+
+import denaro.nick.core.Identifiable;
+import denaro.nick.core.Sprite;
 
 public abstract class Entity extends Identifiable
 {
@@ -168,6 +171,15 @@ public abstract class Entity extends Identifiable
 	public void imageIndex(int index)
 	{
 		imageIndex=index;
+	}
+	
+	/**
+	 * The setter method for imageIndex
+	 * @param xindex - the index in the horizontal direction to assign to imageIndex
+	 */
+	public void imageIndex(int xindex, int yindex)
+	{
+		imageIndex=xindex+yindex*sprite.hSubimages();
 	}
 	
 	/**

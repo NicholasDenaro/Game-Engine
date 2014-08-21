@@ -1,4 +1,4 @@
-package denaro.nick.core;
+package denaro.nick.core.entity;
 
 import java.awt.Point;
 

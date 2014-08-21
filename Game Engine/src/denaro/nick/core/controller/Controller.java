@@ -1,6 +1,8 @@
-package denaro.nick.core;
+package denaro.nick.core.controller;
 
 import java.util.ArrayList;
+
+import denaro.nick.core.GameEngine;
 
 public abstract class Controller
 {

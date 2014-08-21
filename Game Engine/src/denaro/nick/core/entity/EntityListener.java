@@ -1,4 +1,5 @@
-package denaro.nick.core;
+package denaro.nick.core.entity;
+
 
 public interface EntityListener
 {

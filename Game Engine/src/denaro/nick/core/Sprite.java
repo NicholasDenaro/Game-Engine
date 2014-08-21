@@ -98,6 +98,15 @@ public class Sprite extends Identifiable
 		return(height);
 	}
 	
+	/**
+	 * The accessor for the number of horizontal subimages
+	 * @return - the number of horizontal subimages
+	 */
+	public int hSubimages()
+	{
+		return(hSubimages);
+	}
+	
 	public static Sprite sprite(String name)
 	{
 		return(spriteMap.get(name));

@@ -7,6 +7,11 @@ import java.util.LinkedList;
 
 import denaro.nick.controllertest.XBoxControllerListener;
 import denaro.nick.controllertest.XBoxButtonEvent;
+import denaro.nick.core.controller.Controller;
+import denaro.nick.core.controller.ControllerListener;
+import denaro.nick.core.entity.Entity;
+import denaro.nick.core.view.GameView;
+import denaro.nick.core.view.GameViewListener;
 
 public abstract class GameEngine extends Thread implements ControllerListener
 {
@@ -110,66 +115,6 @@ public abstract class GameEngine extends Thread implements ControllerListener
 	}
 	
 	/**
-	 * The accessor for the specified key
-	 * @param keyCode - the key to check
-	 * @return - true if the specified key is pressed
-	 */
-	public boolean isKeyPressed(int keyCode)
-	{
-		return(keys[keyCode]);
-	}
-	
-	/**
-	 * Assigns the specified key as pressed
-	 * @param keyCode - The key to assign to pressed
-	 */
-	/*public void keyPressed(int keyCode)
-	{
-		keys[keyCode]=true;
-	}*/
-	
-	/**
-	 * Assigns the specified key as released
-	 * @param keyCode - The key to assign to released
-	 */
-	/*public void keyReleased(int keyCode)
-	{
-		keys[keyCode]=false;
-	}*/
-	
-	/*public void keyPressed(KeyEvent event)
-	{
-		if(currentFocus instanceof KeyListener)
-			((KeyListener)currentFocus).keyPressed(event);
-		//keyPressed(event.getKeyCode());
-	}
-
-	public void keyReleased(KeyEvent event)
-	{
-		if(currentFocus instanceof KeyListener)
-			((KeyListener)currentFocus).keyReleased(event);
-		//keyReleased(event.getKeyCode());
-	}
-	
-	public void buttonPressed(XBoxEvent event)
-	{
-		if(currentFocus instanceof XBoxControllerListener)
-			((XBoxControllerListener)currentFocus).buttonPressed(event);
-	}
-	
-	public void buttonReleased(XBoxEvent event)
-	{
-		if(currentFocus instanceof XBoxControllerListener)
-			((XBoxControllerListener)currentFocus).buttonReleased(event);
-	}
-	
-	public void analogMoved(XBoxEvent event)
-	{
-		if(currentFocus instanceof XBoxControllerListener)
-			((XBoxControllerListener)currentFocus).analogMoved(event);
-	}*/
-	
-	/**
 	 * The accessor for currentLocaiton
 	 * @return - the current location
 	 */
@@ -180,6 +125,7 @@ public abstract class GameEngine extends Thread implements ControllerListener
 	
 	/**
 	 * The setter for currentLocaiton
+	 * @param location - the location to assign to the current location
 	 */
 	public void location(Location location)
 	{

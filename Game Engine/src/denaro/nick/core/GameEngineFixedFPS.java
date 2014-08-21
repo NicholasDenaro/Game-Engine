@@ -7,13 +7,17 @@ import java.util.ArrayList;
 
 import denaro.nick.controllertest.XBoxControllerListener;
 import denaro.nick.controllertest.XBoxButtonEvent;
+import denaro.nick.core.controller.ControllerEvent;
+import denaro.nick.core.controller.ControllerListener;
+import denaro.nick.core.entity.Entity;
+import denaro.nick.core.timer.TickingTimer;
 
-public class GameEngineByTick extends GameEngine
+public class GameEngineFixedFPS extends GameEngine
 {
 	/**
 	 * Creates a new default GameEngine with 0 ticksPerSecond, 0 framesPerSecond and no view
 	 */
-	private GameEngineByTick()
+	private GameEngineFixedFPS()
 	{
 		engine=this;
 		ticksPerSecond=0;
@@ -26,6 +30,8 @@ public class GameEngineByTick extends GameEngine
 		entityRemoveQueue=new ArrayList<Pair<Entity,Location>>();
 		
 		inputEventQueue=new ArrayList<Pair<ControllerListener, ControllerEvent>>();
+		
+		timers=new ArrayList<TickingTimer>();
 	}
 	
 	@Override
@@ -59,6 +65,11 @@ public class GameEngineByTick extends GameEngine
 	public void addEntity(Entity entity,Location location)
 	{
 		entityAddQueue.add(new Pair(entity,location));
+	}
+	
+	public void addTimer(TickingTimer timer)
+	{
+		timers.add(timer);
 	}
 	
 	/**
@@ -172,44 +183,6 @@ public class GameEngineByTick extends GameEngine
 			running=false;
 		}
 	}
-	
-	/*@Override
-	public void keyPressed(KeyEvent event)
-	{
-		if(currentFocus() instanceof KeyListener)
-		{
-			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
-		}
-			//((KeyListener)currentFocus()).keyPressed(event);
-		//keyPressed(event.getKeyCode());
-	}
-
-	@Override
-	public void keyReleased(KeyEvent event)
-	{
-		if(currentFocus() instanceof KeyListener)
-			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
-			//((KeyListener)currentFocus()).keyReleased(event);
-		//keyReleased(event.getKeyCode());
-	}
-	
-	public void buttonPressed(XBoxEvent event)
-	{
-		if(currentFocus() instanceof XBoxControllerListener)
-			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
-	}
-	
-	public void buttonReleased(XBoxEvent event)
-	{
-		if(currentFocus() instanceof XBoxControllerListener)
-			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
-	}
-	
-	public void analogMoved(XBoxEvent event)
-	{
-		if(currentFocus() instanceof XBoxControllerListener)
-			inputEventQueue.add(new Pair<Focusable, ControllerEvent>(currentFocus(),event));
-	}*/
 
 	/** 
 	 * progresses the game 1 tick
@@ -233,32 +206,15 @@ public class GameEngineByTick extends GameEngine
 			for(int i=0;i<tempQueue.size();i++)
 			{
 				Pair<ControllerListener, ControllerEvent> pair=tempQueue.get(i);
-				if(pair.first()==null)
-				{
-					//breakpoint!!!
-					i--;
-					i++;
-				}
 				pair.first().actionPerformed(pair.second());
-				/*if(pair.second() instanceof KeyEvent)
-				{
-					KeyEvent event=(KeyEvent)pair.second();
-					if(event.getID()==KeyEvent.KEY_PRESSED)
-						((KeyListener)pair.first()).keyPressed(event);
-					else if(event.getID()==KeyEvent.KEY_RELEASED)
-						((KeyListener)pair.first()).keyReleased(event);
-				}
-				if(pair.second() instanceof XBoxEvent)
-				{
-					XBoxEvent event=(XBoxEvent)pair.second();
-					if(event.getEventType()==XBoxEvent.BUTTON_PRESSED)
-						((XBoxControllerListener)pair.first()).buttonPressed(event);
-					else if(event.getEventType()==XBoxEvent.BUTTON_RELEASED)
-						((XBoxControllerListener)pair.first()).buttonReleased(event);
-					else if(event.getEventType()==XBoxEvent.ANALOG_MOVED)
-						((XBoxControllerListener)pair.first()).analogMoved(event);
-				}*/
 			}
+		}
+		
+		//tick all of the ticking timers
+		for(int i=0;i<timers.size();i++)
+		{
+			if(timers.get(i).tick())
+				timers.remove(i--);
 		}
 		
 		//perform the EngineActions!
@@ -332,11 +288,13 @@ public class GameEngineByTick extends GameEngine
 	public static GameEngine instance()
 	{
 		if(engine==null)
-			engine=new GameEngineByTick();
+			engine=new GameEngineFixedFPS();
 		return(engine);
 	}
 	
 	private static GameEngine engine;
+	
+	private ArrayList<TickingTimer> timers;
 	
 	private ArrayList<Pair<Entity,Location>> entityAddQueue;
 	private ArrayList<Pair<Entity,Location>> entityRemoveQueue;

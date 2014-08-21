@@ -8,6 +8,9 @@ import java.awt.event.FocusListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import denaro.nick.core.view.GameView;
+import denaro.nick.core.view.GameViewListener;
+
 public class GameFrame extends JFrame implements FocusListener, GameViewListener
 {
 	/**

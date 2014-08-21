@@ -6,6 +6,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import denaro.nick.core.entity.Entity;
+import denaro.nick.core.entity.EntityEvent;
+import denaro.nick.core.entity.EntityListener;
+
 public class Location extends Identifiable implements EntityListener
 {
 	/**
@@ -109,7 +113,7 @@ public class Location extends Identifiable implements EntityListener
 	 * Returns the layers of the background in this location
 	 * @return - all the layers for the background
 	 */
-	protected HashMap<Integer,BufferedImage> backgroundLayers()
+	public HashMap<Integer,BufferedImage> backgroundLayers()
 	{
 		if(backgroundLayers==null)
 			backgroundLayers=new HashMap<Integer,BufferedImage>();
@@ -120,7 +124,7 @@ public class Location extends Identifiable implements EntityListener
 	 * Returns the entities in this location 
 	 * @return - all the entities
 	 */
-	protected HashMap<Integer,ArrayList<Entity>> entityListByDepth()
+	public HashMap<Integer,ArrayList<Entity>> entityListByDepth()
 	{
 		if(entitiesByDepth==null)
 			entitiesByDepth=new HashMap<Integer,ArrayList<Entity>>();

@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.awt.image.BufferedImage;
@@ -17,20 +18,22 @@ import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import denaro.nick.core.Entity;
 import denaro.nick.core.GameEngine;
-import denaro.nick.core.GameEngineByTick;
-import denaro.nick.core.GameView2D;
+import denaro.nick.core.GameEngineFixedFPS;
+import denaro.nick.core.GameEngineFixedTick;
 import denaro.nick.core.Location;
 import denaro.nick.core.Sprite;
+import denaro.nick.core.entity.Entity;
+import denaro.nick.core.view.GameView2D;
 
 public class Main
 {
+	
 	public static void main(String[] args)
 	{
 		JFrame frame=new JFrame("Game");
 		frame.setResizable(false);
-		GameEngineByTick engine=(GameEngineByTick)GameEngineByTick.instance();
+		GameEngineFixedTick engine=(GameEngineFixedTick)GameEngineFixedTick.instance();
 		engine.view(new GameView2D(320,320,1,1));
 		JPanel panel=new JPanel();
 		panel.setPreferredSize(engine.view().getSize());
@@ -44,14 +47,30 @@ public class Main
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+		Dimension size=Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(size.width/2-frame.getWidth()/2,size.height/2-frame.getHeight()/2);
 		
-		engine.setTicksPerSecond(60);
-		engine.setFramesPerSecond(60);
-		
-		engine.start();
+		try
+		{
+			engine.setTicksPerSecond(60);
+		}
+		catch(Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//engine.setFramesPerSecond(60);
 		
 		engine.view().setBackground(Color.black);
+		engine.view().setForeground(Color.white);
 		
+		setup(engine);
+		
+		engine.start();
+	}
+	
+	public static void setup(GameEngineFixedTick engine)
+	{		
 		Location testRoom=new Location();
 		engine.location(testRoom);
 		
@@ -109,7 +128,7 @@ class Orbital extends Entity
 	@Override
 	public void tick()
 	{
-		ArrayList<Entity> orbitals=GameEngineByTick.instance().location().entityList(Orbital.class);
+		ArrayList<Entity> orbitals=GameEngineFixedTick.instance().location().entityList(Orbital.class);
 		for(Entity entity:orbitals)
 		{
 			Orbital orbital=(Orbital)entity;
@@ -128,6 +147,11 @@ class Orbital extends Entity
 			moveDelta(velocity.x,velocity.y);
 		}
 		acceleration=new Point.Double(0,0);
+		
+		for(int i=0;i<10000;i++)
+		{
+			//System.out.format("","");//this lags the game
+		}
 	}
 	
 	private double theta; 

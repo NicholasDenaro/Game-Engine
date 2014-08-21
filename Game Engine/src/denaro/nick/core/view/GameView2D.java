@@ -1,4 +1,4 @@
-package denaro.nick.core;
+package denaro.nick.core.view;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -9,6 +9,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+
+import denaro.nick.core.GameEngine;
+import denaro.nick.core.GameEngineFixedFPS;
+import denaro.nick.core.GameEngineFixedTick;
+import denaro.nick.core.Location;
+import denaro.nick.core.Sprite;
+import denaro.nick.core.entity.Entity;
 
 public class GameView2D extends GameView
 {
@@ -62,12 +69,22 @@ public class GameView2D extends GameView
 			if(entitiesAtDepth!=null)
 				for(Entity entity:entitiesAtDepth)
 				{
-					Sprite sprite=entity.sprite();
-					double x=entity.x()-sprite.anchor().x+entity.offset().x;
-					double y=entity.y()-sprite.anchor().y+entity.offset().y;
-					g.drawImage(entity.image(),(int)x,(int)y,null);
+					drawEntity(entity,g);
 				}
 		}
+	}
+	
+	/**
+	 * Draws an entity to the specified graphics
+	 * @param entity - the entity to draw
+	 * @param g - the graphics to draw the entity to
+	 */
+	public void drawEntity(Entity entity, Graphics2D g)
+	{
+		Sprite sprite=entity.sprite();
+		double x=entity.x()-sprite.anchor().x+entity.offset().x;
+		double y=entity.y()-sprite.anchor().y+entity.offset().y;
+		g.drawImage(entity.image(),(int)x,(int)y,null);
 	}
 	
 	/**
@@ -76,7 +93,7 @@ public class GameView2D extends GameView
 	 */
 	public void drawSystemInfo(Graphics2D g)
 	{
-		GameEngine engine=GameEngineByTick.instance();
+		GameEngine engine=GameEngineFixedTick.instance();
 		
 		g.setColor(this.getForeground());
 		ArrayList<String> info=engine.information();
@@ -90,7 +107,7 @@ public class GameView2D extends GameView
 	@Override
 	public void redraw()
 	{
-		GameEngine engine=GameEngineByTick.instance();
+		GameEngine engine=GameEngineFixedTick.instance();
 		if(buffer==null)
 			if(getWidth()>0)
 				buffer=new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_ARGB);
