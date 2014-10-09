@@ -11,6 +11,14 @@ import javax.imageio.ImageIO;
 
 public class Sprite extends Identifiable
 {
+	/**
+	 * Creates a Sprite from a bufferedImage
+	 * @param name - the name of the sprite
+	 * @param image - the image of the sprite
+	 * @param width - the width of the subimages
+	 * @param height - the height of the subimages
+	 * @param origin - the origin of the sprite to draw at
+	 */
 	public Sprite(String name, BufferedImage image, int width, int height, Point origin)
 	{
 		this.name=name;
@@ -30,6 +38,15 @@ public class Sprite extends Identifiable
 		spriteMap.put(name,this);
 	}
 	
+	/**
+	 * Creates a Sprite form a file
+	 * @param name - the name of the sprite
+	 * @param fname - the name of the file to load in from
+	 * @param width - the width of the subimages
+	 * @param height - the height of the subimages
+	 * @param origin - the origin of the sprite to draw at
+	 * @throws IOException - Throws an exception if the read fails
+	 */
 	public Sprite(String name, String fname, int width, int height, Point origin) throws IOException
 	{
 		this(name,ImageIO.read(new File(fname)),width,height,origin);

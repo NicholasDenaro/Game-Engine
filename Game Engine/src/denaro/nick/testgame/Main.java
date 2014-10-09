@@ -18,10 +18,14 @@ import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import denaro.nick.core.FixedFPSType;
+import denaro.nick.core.FixedTickType;
 import denaro.nick.core.GameEngine;
-import denaro.nick.core.GameEngineFixedFPS;
-import denaro.nick.core.GameEngineFixedTick;
+import denaro.nick.core.GameEngineException;
+//import denaro.nick.core.GameEngineFixedFPS;
+//import denaro.nick.core.GameEngineFixedTick;
 import denaro.nick.core.Location;
+import denaro.nick.core.LocationAddEntityException;
 import denaro.nick.core.Sprite;
 import denaro.nick.core.entity.Entity;
 import denaro.nick.core.view.GameView2D;
@@ -33,7 +37,18 @@ public class Main
 	{
 		JFrame frame=new JFrame("Game");
 		frame.setResizable(false);
-		GameEngineFixedTick engine=(GameEngineFixedTick)GameEngineFixedTick.instance();
+		GameEngine engine;
+		try
+		{
+			//engine=GameEngine.instance(new FixedFPSType(60,60),false);
+			engine=GameEngine.instance(new FixedTickType(60),false);
+		}
+		catch(GameEngineException e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+			return;
+		}
 		engine.view(new GameView2D(320,320,1,1));
 		JPanel panel=new JPanel();
 		panel.setPreferredSize(engine.view().getSize());
@@ -50,26 +65,22 @@ public class Main
 		Dimension size=Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(size.width/2-frame.getWidth()/2,size.height/2-frame.getHeight()/2);
 		
-		try
-		{
-			engine.setTicksPerSecond(60);
-		}
-		catch(Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//engine.setFramesPerSecond(60);
-		
 		engine.view().setBackground(Color.black);
 		engine.view().setForeground(Color.white);
 		
-		setup(engine);
+		try
+		{
+			setup(engine);
+		}
+		catch(LocationAddEntityException e)
+		{
+			e.printStackTrace();
+		}
 		
 		engine.start();
 	}
 	
-	public static void setup(GameEngineFixedTick engine)
+	public static void setup(GameEngine engine) throws LocationAddEntityException
 	{		
 		Location testRoom=new Location();
 		engine.location(testRoom);
@@ -128,7 +139,7 @@ class Orbital extends Entity
 	@Override
 	public void tick()
 	{
-		ArrayList<Entity> orbitals=GameEngineFixedTick.instance().location().entityList(Orbital.class);
+		ArrayList<Entity> orbitals=GameEngine.instance().location().entityList(Orbital.class);
 		for(Entity entity:orbitals)
 		{
 			Orbital orbital=(Orbital)entity;

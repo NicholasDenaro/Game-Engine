@@ -14,6 +14,10 @@ public class ControllerEvent
 		this.modifier=modifier;
 	}
 	
+	/**
+	 * Returns the action code for Pressed/Released etc.
+	 * @return - the action code of the event
+	 */
 	public int action()
 	{
 		return(action);

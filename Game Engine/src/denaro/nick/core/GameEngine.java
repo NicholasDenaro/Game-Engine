@@ -1,20 +1,47 @@
 package denaro.nick.core;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import denaro.nick.controllertest.XBoxControllerListener;
-import denaro.nick.controllertest.XBoxButtonEvent;
 import denaro.nick.core.controller.Controller;
+import denaro.nick.core.controller.ControllerEvent;
 import denaro.nick.core.controller.ControllerListener;
 import denaro.nick.core.entity.Entity;
+import denaro.nick.core.timer.TickingTimer;
 import denaro.nick.core.view.GameView;
 import denaro.nick.core.view.GameViewListener;
 
-public abstract class GameEngine extends Thread implements ControllerListener
+public class GameEngine/* extends Thread*/ implements ControllerListener
 {
+	private GameEngine(EngineType type)
+	{
+		this.type=type;
+		
+		currentView=null;
+		
+		entityAddQueue=new ArrayList<Pair<Entity,Location>>();
+
+		entityRemoveQueue=new ArrayList<Pair<Entity,Location>>();
+		
+		inputEventQueue=new ArrayList<Pair<ControllerListener, ControllerEvent>>();
+		
+		timers=new ArrayList<TickingTimer>();
+	}
+	
+	public void start()
+	{
+		type.start();
+	}
+	
+	public void stop()
+	{
+		type.stopRunning();
+	}
+	
+	public void kill()
+	{
+		//TODO this is the end of the engine
+	}
 	
 	public void controller(Controller controller)
 	{
@@ -46,26 +73,113 @@ public abstract class GameEngine extends Thread implements ControllerListener
 		return(actions.pop());
 	}
 	
+	@Override
+	public void actionPerformed(ControllerEvent event)
+	{
+		// TODO make sure this works
+		if(currentFocus()!=null)
+			if(currentFocus() instanceof ControllerListener)
+			{
+				inputEventQueue.add(new Pair<ControllerListener,ControllerEvent>((ControllerListener)this.currentFocus(),event));
+			}
+	}
+	
+	public void tick()
+	{
+		//ticks
+		if(currentLocation!=null)
+			currentLocation.tick();
+		
+		//key presses
+		if(!inputEventQueue.isEmpty())
+		{
+			//System.out.println("queue size: "+inputEventQueue.size());
+			ArrayList<Pair<ControllerListener,ControllerEvent>> tempQueue=new ArrayList<Pair<ControllerListener,ControllerEvent>>();
+			int size=inputEventQueue.size();
+			for(int i=0;i<size;i++)
+				if(inputEventQueue.get(i)!=null)
+					tempQueue.add(inputEventQueue.get(i));
+			inputEventQueue.clear();
+			for(int i=0;i<tempQueue.size();i++)
+			{
+				Pair<ControllerListener, ControllerEvent> pair=tempQueue.get(i);
+				pair.first().actionPerformed(pair.second());
+			}
+		}
+		
+		//tick all of the ticking timers
+		for(int i=0;i<timers.size();i++)
+		{
+			if(timers.get(i).tick())
+				timers.remove(i--);
+		}
+		
+		//perform the EngineActions!
+		while(hasActions())
+		{
+			EngineAction action=peekAction();
+			action.callFunction();
+			if(action.shouldEnd())
+				popAction();
+		}
+		
+		//entity adding/deleting
+		if(!entityAddQueue.isEmpty())
+		{
+			ArrayList<Pair<Entity,Location>> clone=(ArrayList<Pair<Entity,Location>>)entityAddQueue.clone();
+			for(Pair<Entity,Location> pair:clone)
+			{
+				try
+				{
+					if(pair.second()==null)
+						throw new LocationAddEntityException("Can't add an entity to a null location.");
+					pair.second().addEntity(pair.first());
+				}
+				catch(LocationAddEntityException ex)
+				{
+					//ex.printStackTrace();
+					//System.out.println("*ERROR*: Entity already exists at location");
+				}
+			}
+			entityAddQueue.clear();
+		}
+		
+		if(!entityRemoveQueue.isEmpty())
+		{
+			ArrayList<Pair<Entity,Location>> clone=(ArrayList<Pair<Entity,Location>>)entityRemoveQueue.clone();
+			for(Pair<Entity,Location> pair:clone)
+			{
+				pair.second().removeEntity(pair.first());
+			}
+			entityRemoveQueue.clear();
+		}
+	}
+	
+	public void redraw()
+	{
+		if(currentView!=null)
+		{
+			currentView.redraw();
+			currentView.repaint();
+		}
+	}
+	
 	/**
 	 * Adds an entity to the specified location
 	 * @param entity - the entity to add
 	 * @param location - the location at which to add the entity
 	 * @throws LocationAddEntityException 
 	 */
-	public void addEntity(Entity entity,Location location) throws LocationAddEntityException
+	public void addEntity(Entity entity, Location location)// throws LocationAddEntityException
 	{
-		location.addEntity(entity);
+		//location.addEntity(entity);
+		entityAddQueue.add(new Pair(entity,location));
 	}
 	
 	/**
 	 * Adds the specified listener to the keyListeners
 	 * @param listener - the Listener to be added.
 	 */
-	/*public void addKeyListener(KeyListener listener)
-	{
-		if(!keyListeners.contains(listener))
-			keyListeners.add(listener);
-	}*/
 	public void addControllerListener(ControllerListener listener)
 	{
 		if(!controllerListeners.contains(listener))
@@ -111,7 +225,7 @@ public abstract class GameEngine extends Thread implements ControllerListener
 	 */
 	public void removeEntity(Entity entity,Location location)
 	{
-		location.removeEntity(entity);
+		entityRemoveQueue.add(new Pair(entity,location));
 	}
 	
 	/**
@@ -136,7 +250,10 @@ public abstract class GameEngine extends Thread implements ControllerListener
 	 * Returns information about the engine
 	 * @return - the information of the engine
 	 */
-	public abstract ArrayList<String> information();
+	public ArrayList<String> information()
+	{
+		return(type.information());
+	}
 	
 	/**
 	 * the accessor method for currentView
@@ -162,6 +279,60 @@ public abstract class GameEngine extends Thread implements ControllerListener
 			listener.viewChanged(view);
 	}
 	
+	public static GameEngine instance()
+	{
+		return(engine);
+	}
+	
+	public static GameEngine instance(EngineType type, boolean force) throws GameEngineException
+	{
+		if(engine==null)
+		{
+			if(type!=null)
+			{
+				engine=new GameEngine(type);
+				type.setEngine(engine);
+				return(engine);
+			}
+			else
+			{
+				throw new GameEngineException("Can't create an engine without a type");
+			}
+		}
+		else
+		{
+			if(force)
+			{
+				if(type!=null)
+				{
+					engine.stop();
+					while(engine.type.isAlive())
+					{
+						try
+						{
+							Thread.sleep(1);
+						}
+						catch(InterruptedException e)
+						{
+							//who cares?!
+						}
+					};
+					engine=new GameEngine(type);
+					type.setEngine(engine);
+					return(engine);
+				}
+				else
+				{
+					throw new GameEngineException("Can't create an engine without a type");
+				}
+			}
+			else
+			{
+				throw new GameEngineException("Can't create an engine if one exists");
+			}
+		}
+	}
+	
 	/** The current view that the game has.*/
 	protected GameView currentView;
 	
@@ -177,12 +348,18 @@ public abstract class GameEngine extends Thread implements ControllerListener
 	/** The current KeyListener that has focus*/
 	private Focusable currentFocus;
 	
-	/** An array of the key states*/
-	private boolean[] keys;
-	
 	/** A list of the actions to be taken by the engine*/
 	private LinkedList<EngineAction> actions=new LinkedList<EngineAction>();
 	
 	/** Listeners of views*/
 	private ArrayList<GameViewListener> gameViewListeners;
+	
+	private EngineType type;
+	
+	private ArrayList<TickingTimer> timers;
+	
+	private ArrayList<Pair<Entity,Location>> entityAddQueue;
+	private ArrayList<Pair<Entity,Location>> entityRemoveQueue;
+	
+	private ArrayList<Pair<ControllerListener,ControllerEvent>> inputEventQueue;
 }

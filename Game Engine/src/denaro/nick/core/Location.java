@@ -20,7 +20,7 @@ public class Location extends Identifiable implements EntityListener
 	protected void addEntity(Entity entity) throws LocationAddEntityException
 	{
 		if(entity==null)
-			throw new LocationAddEntityException();
+			throw new LocationAddEntityException("Can't add a null entity to a room.");
 		
 		if(entitiesByDepth==null)
 			entitiesByDepth=new HashMap<Integer,ArrayList<Entity>>();
@@ -33,7 +33,7 @@ public class Location extends Identifiable implements EntityListener
 		}
 		else
 		{
-			throw new LocationAddEntityException();
+			throw new LocationAddEntityException("Entity already exists in this location.");
 		}
 	}
 	

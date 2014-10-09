@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import denaro.nick.core.GameEngine;
-import denaro.nick.core.GameEngineFixedFPS;
-import denaro.nick.core.GameEngineFixedTick;
 import denaro.nick.core.Location;
 import denaro.nick.core.Sprite;
 import denaro.nick.core.entity.Entity;
@@ -93,7 +91,7 @@ public class GameView2D extends GameView
 	 */
 	public void drawSystemInfo(Graphics2D g)
 	{
-		GameEngine engine=GameEngineFixedTick.instance();
+		GameEngine engine=GameEngine.instance();
 		
 		g.setColor(this.getForeground());
 		ArrayList<String> info=engine.information();
@@ -107,7 +105,7 @@ public class GameView2D extends GameView
 	@Override
 	public void redraw()
 	{
-		GameEngine engine=GameEngineFixedTick.instance();
+		GameEngine engine=GameEngine.instance();
 		if(buffer==null)
 			if(getWidth()>0)
 				buffer=new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_ARGB);
