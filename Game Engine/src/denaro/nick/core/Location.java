@@ -3,8 +3,19 @@ package denaro.nick.core;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
 
 import denaro.nick.core.entity.Entity;
 import denaro.nick.core.entity.EntityEvent;
@@ -38,10 +49,45 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	/**
+	 * Adds an entity to the list of entities by depth. DON'T USE UNLESS YOU KNOW WHAT YOU'RE DOING. You PROBABLY want engine.addEntity(location,entity);
+	 * @param entity - The entity to add to the list
+	 * @throws LocationAddEntityException 
+	 */
+	public void addEntityUnprotected(Entity entity) throws LocationAddEntityException
+	{
+		if(entity==null)
+			throw new LocationAddEntityException("Can't add a null entity to a room.");
+		
+		if(entitiesByDepth==null)
+			entitiesByDepth=new HashMap<Integer,ArrayList<Entity>>();
+		if(entitiesByDepth.get(entity.depth())==null)
+			entitiesByDepth.put(entity.depth(), new ArrayList<Entity>());
+		if(!entitiesByDepth.get(entity.depth()).contains(entity))
+		{
+			System.out.println("adding entity----------------------");
+			entitiesByDepth.get(entity.depth()).add(entity);
+			entity.addListener(this);
+		}
+		else
+		{
+			throw new LocationAddEntityException("Entity already exists in this location.");
+		}
+	}
+	
+	/**
 	 * Removes an entity from the list of entities by depth
 	 * @param entity - the entity to remove from the list
 	 */
 	protected void removeEntity(Entity entity)
+	{
+		entitiesByDepth.get(entity.depth()).remove(entity);
+	}
+	
+	/**
+	 * Removes an entity from the list of entities by depth. DON'T USE UNLESS YOU KNOW WHAT YOU'RE DOING. You PROBABLY want engine.removeEntity(location,entity);
+	 * @param entity - the entity to remove from the list
+	 */
+	public void removeEntityUnprotected(Entity entity)
 	{
 		entitiesByDepth.get(entity.depth()).remove(entity);
 	}
@@ -171,6 +217,136 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	
+	/**
+	 * Reads and returns a location from the inputstream
+	 * @param in - the input stream to read from
+	 * @return - the location read from the stream
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	public static Location readFromStream(InputStream in) throws ClassNotFoundException, IOException
+	{
+		Location location=(Location)((ObjectInputStream)in).readObject();
+		return(location);
+	}
+	
+	/**
+	 * Writes a location to the outputstream
+	 * @param out - the outputstream to write the entity to
+	 * @param location - the location to write
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	public static void writeToStream(OutputStream out, Location location) throws ClassNotFoundException, IOException
+	{
+		((ObjectOutputStream)out).writeObject(location);
+	}
+	
+	/**
+	 * Writes the location to the specified output stream
+	 * @param out - the output stream to write this location to
+	 * @throws IOException 
+	 */
+	private void writeObject(ObjectOutputStream out) throws IOException
+	{
+		System.out.println("started writing location...");
+		out.writeInt(entitiesByDepth.size());
+		Iterator<Integer> it=entitiesByDepth.keySet().iterator();
+		while(it.hasNext())
+		{
+			int index=it.next();
+			out.writeInt(index);
+			ArrayList<Entity> entities=entitiesByDepth.get(index);
+			out.writeInt(entities.size());
+			for(Entity e:entities)
+			{
+				System.out.println("writing entity...");
+				out.writeObject(e);
+				System.out.println("entity written...");
+			}
+		}
+		System.out.println("wrote entities");
+		
+		out.writeInt(backgroundLayers.size());
+		System.out.println("backgroundLayers.size() "+backgroundLayers.size());
+		it=backgroundLayers.keySet().iterator();
+		while(it.hasNext())
+		{
+			int index=it.next();
+			out.writeInt(index);
+			System.out.println("writing img: "+backgroundLayers.get(index));
+			ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+			ImageIO.write(backgroundLayers.get(index),"png",buffer);
+			System.out.println("buffer size: "+buffer.size());//this shouldn't be 0!!!
+			out.writeInt(buffer.size());
+			out.write(buffer.toByteArray());
+		}
+		System.out.println("finished writing location...");
+	}
+	
+	/**
+	 * Reads in a Location object
+	 * @param in - the ObjectInputStream to read from
+	 * @throws IOException
+	 * @throws ClassNotFoundException 
+	 */
+	private void readObject(ObjectInputStream in) throws IOException
+	{
+		int keys=in.readInt();
+		entitiesByDepth=new HashMap<Integer,ArrayList<Entity>>();
+		for(int i=0;i<keys;i++)
+		{
+			int key=in.readInt();
+			ArrayList<Entity> entities=new ArrayList<Entity>();
+			try
+			{
+				int size=in.readInt();
+				for(int a=0;a<size;a++)
+				{
+					Entity e=(Entity)in.readObject();
+					entities.add(e);
+				}
+				entitiesByDepth.put(key,entities);
+				
+			}
+			catch(ClassNotFoundException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		keys=in.readInt();
+		System.out.println("number of keys being read: "+keys);
+		backgroundLayers=new HashMap<Integer,BufferedImage>();
+		for(int i=0;i<keys;i++)
+		{
+			int key=in.readInt();
+			int size=in.readInt();
+			byte[] bytebuf=new byte[size];
+			int index=0;
+			while(index<size)
+			{
+				try
+				{
+					bytebuf[index++]=in.readByte();
+				}
+				catch(EOFException ex)
+				{
+					System.out.println("index: "+(index-1));
+					System.out.println("size: "+size);
+					throw ex;
+				}
+			}
+			//System.out.println("number of read bytes from in: "+in.read(bytebuf,0,size));
+			System.out.println("number of bytes read: "+size);
+			ByteArrayInputStream buffer=new ByteArrayInputStream(bytebuf);
+			System.out.println("buffer size: "+buffer.available());
+			BufferedImage img=ImageIO.read(buffer);
+			System.out.println("img: "+img);
+			backgroundLayers.put(key,img);
+		}
+	}
 	
 	/** Stores all the entities by their depth*/
 	private HashMap<Integer,ArrayList<Entity>> entitiesByDepth;

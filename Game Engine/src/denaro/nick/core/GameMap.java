@@ -29,7 +29,10 @@ public class GameMap <V extends Identifiable>
 	public void add(V v)
 	{
 		if(values.containsValue(v))
+		{
 			System.out.println("ERROR: Already contains this object");
+			new Exception().printStackTrace();
+		}
 		else
 		{
 			v.id(counter);

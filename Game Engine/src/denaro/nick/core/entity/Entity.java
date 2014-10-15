@@ -7,7 +7,13 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import denaro.nick.core.Identifiable;
@@ -30,7 +36,11 @@ public abstract class Entity extends Identifiable
 		if(sprite!=null)
 		{
 			Rectangle.Double rect=new Rectangle.Double(-sprite.anchor().x,-sprite.anchor().y,this.sprite.width(),this.sprite.height());
-			this.mask=new Area(rect);
+			this.mask=new Mask(new Area(rect));
+		}
+		else
+		{
+			this.mask=new Mask(new Area());
 		}
 		this.depth=0;
 		this.lastDepth=this.depth;
@@ -64,7 +74,7 @@ public abstract class Entity extends Identifiable
 			af.translate(loc.x,loc.y);
 		else
 			af.translate(this.x,this.y);
-		Area myarea=mask.createTransformedArea(af);
+		Area myarea=mask.area().createTransformedArea(af);
 		
 		
 		myarea.intersect(other);
@@ -90,7 +100,7 @@ public abstract class Entity extends Identifiable
 		
 		AffineTransform af=new AffineTransform();
 		af.translate(other.x,other.y);
-		Area otherarea=other.mask.createTransformedArea(af);
+		Area otherarea=other.mask.area().createTransformedArea(af);
 		
 		/*myarea.intersect(otherarea);
 		return(!myarea.isEmpty());*/
@@ -157,10 +167,12 @@ public abstract class Entity extends Identifiable
 	
 	/**
 	 * Returns the image that represents the entity
-	 * @return - the image that currently represents the entity
+	 * @return - the image that currently represents the entity. If no sprite, returns null
 	 */
 	public Image image()
 	{
+		if(sprite==null)
+			return(null);
 		return(sprite.subimage(imageIndex));
 	}
 	
@@ -224,7 +236,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public Area mask()
 	{
-		return(mask);
+		return(mask.area());
 	}
 	
 	/**
@@ -233,8 +245,8 @@ public abstract class Entity extends Identifiable
 	 */
 	public void mask(Area area)
 	{
-		mask.reset();
-		mask=area;
+		mask.area().reset();
+		mask=new Mask(area);
 	}
 	
 	/**
@@ -350,6 +362,115 @@ public abstract class Entity extends Identifiable
 		this.sprite=sprite;
 	}
 	
+	@Override
+	public boolean equals(Object object)
+	{
+		System.out.println("did this break things?!");
+		if(object instanceof Entity)
+		{
+			Entity other=(Entity)object;
+			if(id()==-1||other.id()==-1)
+			{
+				return(this==other);
+			}
+			if(id()==other.id())
+				return(true);
+		}
+		return(false);
+	}
+	
+	/**
+	 * Reads and returns an entity from the inputstream
+	 * @param in - the input stream to read from
+	 * @return - the entity read from the stream
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	public static Entity readFromStream(InputStream in) throws ClassNotFoundException, IOException
+	{
+		Entity entity=(Entity)((ObjectInputStream)in).readObject();
+		return(entity);
+	}
+	
+	/**
+	 * Writes an entity to the outputstream
+	 * @param out - the outputstream to write the entity to
+	 * @param entity - the entity to write
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	public static void writeToStream(OutputStream out, Entity entity) throws ClassNotFoundException, IOException
+	{
+		((ObjectOutputStream)out).writeObject(entity);
+	}
+	
+	/**
+	 * Writes this object to the outputstream
+	 * @param out - the output stream to write this object to
+	 * @throws IOException
+	 */
+	private void writeObject(ObjectOutputStream out) throws IOException
+	{
+		
+		System.out.println("**********BEGIN-W**********");
+		System.out.println(this);
+		System.out.println("What's my fucking ID? "+id());
+		out.writeObject(listeners);
+		out.writeInt(imageIndex);
+		out.writeObject(offset);
+		out.writeDouble(x);
+		out.writeDouble(y);
+		out.writeInt(lastDepth);
+		out.writeDouble(lastX);
+		out.writeDouble(lastY);
+		out.writeInt(depth);
+		out.writeObject(mask);
+		out.writeObject(sprite);
+		System.out.println("**********END-W**********");
+	}
+	
+	/**
+	 * Reads this object from the inputstream
+	 * @param in - the input stream to read this object from
+	 * @throws IOException
+	 */
+	private void readObject(ObjectInputStream in) throws IOException
+	{
+		System.out.println("**********BEGIN-R**********");
+		try
+		{
+			listeners=(ArrayList<EntityListener>)in.readObject();
+		}
+		catch(ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		imageIndex=in.readInt();
+		try
+		{
+			offset=(Point2D.Double)in.readObject();
+		}
+		catch(ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		x=in.readDouble();
+		y=in.readDouble();
+		lastDepth=in.readInt();
+		lastX=in.readDouble();
+		lastY=in.readDouble();
+		depth=in.readInt();
+		try
+		{
+			mask=(Mask)in.readObject();
+			sprite=(Sprite)in.readObject();
+		}
+		catch(ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("**********END-R**********");
+	}
 	
 	public static double dot(double direction1, double direction2)
 	{
@@ -392,7 +513,7 @@ public abstract class Entity extends Identifiable
 	private int depth;
 	
 	/** The collision mask for this entity*/
-	private Area mask;
+	private Mask mask;
 	
 	/** The sprite which contains the image for the entity.*/
 	private Sprite sprite;

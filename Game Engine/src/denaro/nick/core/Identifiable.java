@@ -23,5 +23,5 @@ public class Identifiable implements Serializable
 	}
 	
 	/**The id which identifies the identifiable*/
-	private int id;
+	private int id=-1;
 }

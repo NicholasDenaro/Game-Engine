@@ -5,6 +5,8 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
@@ -122,6 +124,46 @@ public class Sprite extends Identifiable
 	public int hSubimages()
 	{
 		return(hSubimages);
+	}
+	
+	/**
+	 * Tells ObjectOutputStream how to write this object
+	 * @param out - the output stream that this object is written to
+	 * @throws IOException 
+	 */
+	private void writeObject(ObjectOutputStream out) throws IOException
+	{
+		System.out.println("starting writing sprite...");
+		out.writeObject(name);
+		out.writeInt(width);
+		out.writeInt(height);
+		out.writeInt(hSubimages);
+		out.writeObject(anchor);
+		ImageIO.write(image,"png",out);
+		System.out.println("ending writing sprite...");
+	}
+	
+	/**
+	 * Reads the object from an ObjectInputStream
+	 * @param in - the ObjectInputStream to read from
+	 * @throws IOException
+	 */
+	private void readObject(ObjectInputStream in) throws IOException
+	{
+		try
+		{
+			name=(String)in.readObject();
+			width=in.readInt();
+			height=in.readInt();
+			hSubimages=in.readInt();
+			anchor=(Point)in.readObject();
+			image=ImageIO.read(in);
+		}
+		catch(ClassNotFoundException e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	public static Sprite sprite(String name)
