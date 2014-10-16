@@ -411,10 +411,6 @@ public abstract class Entity extends Identifiable
 	 */
 	private void writeObject(ObjectOutputStream out) throws IOException
 	{
-		
-		System.out.println("**********BEGIN-W**********");
-		System.out.println(this);
-		System.out.println("What's my fucking ID? "+id());
 		out.writeObject(listeners);
 		out.writeInt(imageIndex);
 		out.writeObject(offset);
@@ -426,7 +422,6 @@ public abstract class Entity extends Identifiable
 		out.writeInt(depth);
 		out.writeObject(mask);
 		out.writeObject(sprite);
-		System.out.println("**********END-W**********");
 	}
 	
 	/**
@@ -436,7 +431,6 @@ public abstract class Entity extends Identifiable
 	 */
 	private void readObject(ObjectInputStream in) throws IOException
 	{
-		System.out.println("**********BEGIN-R**********");
 		try
 		{
 			listeners=(ArrayList<EntityListener>)in.readObject();
@@ -469,7 +463,6 @@ public abstract class Entity extends Identifiable
 		{
 			e.printStackTrace();
 		}
-		System.out.println("**********END-R**********");
 	}
 	
 	public static double dot(double direction1, double direction2)

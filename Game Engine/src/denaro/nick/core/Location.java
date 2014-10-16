@@ -249,7 +249,6 @@ public class Location extends Identifiable implements EntityListener
 	 */
 	private void writeObject(ObjectOutputStream out) throws IOException
 	{
-		System.out.println("started writing location...");
 		out.writeInt(entitiesByDepth.size());
 		Iterator<Integer> it=entitiesByDepth.keySet().iterator();
 		while(it.hasNext())
@@ -260,28 +259,21 @@ public class Location extends Identifiable implements EntityListener
 			out.writeInt(entities.size());
 			for(Entity e:entities)
 			{
-				System.out.println("writing entity...");
 				out.writeObject(e);
-				System.out.println("entity written...");
 			}
 		}
-		System.out.println("wrote entities");
 		
 		out.writeInt(backgroundLayers.size());
-		System.out.println("backgroundLayers.size() "+backgroundLayers.size());
 		it=backgroundLayers.keySet().iterator();
 		while(it.hasNext())
 		{
 			int index=it.next();
 			out.writeInt(index);
-			System.out.println("writing img: "+backgroundLayers.get(index));
 			ByteArrayOutputStream buffer=new ByteArrayOutputStream();
 			ImageIO.write(backgroundLayers.get(index),"png",buffer);
-			System.out.println("buffer size: "+buffer.size());//this shouldn't be 0!!!
 			out.writeInt(buffer.size());
 			out.write(buffer.toByteArray());
 		}
-		System.out.println("finished writing location...");
 	}
 	
 	/**
@@ -317,7 +309,6 @@ public class Location extends Identifiable implements EntityListener
 			
 		}
 		keys=in.readInt();
-		System.out.println("number of keys being read: "+keys);
 		backgroundLayers=new HashMap<Integer,BufferedImage>();
 		for(int i=0;i<keys;i++)
 		{
@@ -333,25 +324,20 @@ public class Location extends Identifiable implements EntityListener
 				}
 				catch(EOFException ex)
 				{
-					System.out.println("index: "+(index-1));
-					System.out.println("size: "+size);
 					throw ex;
 				}
 			}
-			//System.out.println("number of read bytes from in: "+in.read(bytebuf,0,size));
-			System.out.println("number of bytes read: "+size);
 			ByteArrayInputStream buffer=new ByteArrayInputStream(bytebuf);
-			System.out.println("buffer size: "+buffer.available());
 			BufferedImage img=ImageIO.read(buffer);
-			System.out.println("img: "+img);
 			backgroundLayers.put(key,img);
 		}
+		addEntitiesDepthQueue=new ArrayList<Pair<Entity,Pair<Integer,Integer>>>();
 	}
 	
 	/** Stores all the entities by their depth*/
 	private HashMap<Integer,ArrayList<Entity>> entitiesByDepth;
 	
-	private ArrayList<Pair<Entity,Pair<Integer,Integer>>> addEntitiesDepthQueue=new ArrayList<Pair<Entity,Pair<Integer,Integer>>>();;
+	private ArrayList<Pair<Entity,Pair<Integer,Integer>>> addEntitiesDepthQueue=new ArrayList<Pair<Entity,Pair<Integer,Integer>>>();
 	
 	/**	Stores the layers background image for the location*/
 	private HashMap<Integer,BufferedImage> backgroundLayers;

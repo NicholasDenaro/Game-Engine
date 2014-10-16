@@ -80,8 +80,13 @@ public class GameView2D extends GameView
 	public void drawEntity(Entity entity, Graphics2D g)
 	{
 		Sprite sprite=entity.sprite();
-		double x=entity.x()-sprite.anchor().x+entity.offset().x;
-		double y=entity.y()-sprite.anchor().y+entity.offset().y;
+		double x=entity.x();
+		double y=entity.y();
+		if(sprite!=null)
+		{
+			x=entity.x()-sprite.anchor().x+entity.offset().x;
+			y=entity.y()-sprite.anchor().y+entity.offset().y;
+		}
 		g.drawImage(entity.image(),(int)x,(int)y,null);
 	}
 	
