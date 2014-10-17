@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import denaro.nick.core.GameMap;
 import denaro.nick.core.Identifiable;
 import denaro.nick.core.Sprite;
 
@@ -47,6 +48,8 @@ public abstract class Entity extends Identifiable
 		this.listeners=new ArrayList<EntityListener>();
 		this.imageIndex=0;
 		this.offset=new Point.Double(0,0);
+		//This is so each entity gets a unique id!
+		allEntities.add(this);
 	}
 	
 	/**
@@ -365,7 +368,7 @@ public abstract class Entity extends Identifiable
 	@Override
 	public boolean equals(Object object)
 	{
-		System.out.println("did this break things?!");
+		//System.out.println("did this break things?!");
 		if(object instanceof Entity)
 		{
 			Entity other=(Entity)object;
@@ -421,7 +424,8 @@ public abstract class Entity extends Identifiable
 		out.writeDouble(lastY);
 		out.writeInt(depth);
 		out.writeObject(mask);
-		out.writeObject(sprite);
+		//out.writeObject(sprite);
+		out.writeObject(sprite.name());
 	}
 	
 	/**
@@ -457,7 +461,9 @@ public abstract class Entity extends Identifiable
 		try
 		{
 			mask=(Mask)in.readObject();
-			sprite=(Sprite)in.readObject();
+			//sprite=(Sprite)in.readObject();
+			String sprName=(String)in.readObject();
+			sprite=Sprite.sprite(sprName);
 		}
 		catch(ClassNotFoundException e)
 		{
@@ -465,6 +471,12 @@ public abstract class Entity extends Identifiable
 		}
 	}
 	
+	/**
+	 * Calculate the dot product of 2 directions
+	 * @param direction1 - the first direction
+	 * @param direction2 - the second direction
+	 * @return - a scalar value
+	 */
 	public static double dot(double direction1, double direction2)
 	{
 		Point2D.Double pointDirection1=new Point2D.Double(Math.cos(direction1),Math.sin(direction1));
@@ -477,6 +489,17 @@ public abstract class Entity extends Identifiable
 	 * 
 	 */
 	public abstract void tick();
+	
+	
+	/**
+	 * Gets the entity with the specified id from all of the entities
+	 * @param id - the id of the entity to get
+	 * @return - the entity with the specified id
+	 */
+	public static Entity entity(int id)
+	{
+		return(allEntities.get(id));
+	}
 	
 	/** A list of all the listeners that are currently listening to this object*/
 	private ArrayList<EntityListener> listeners;
@@ -511,5 +534,8 @@ public abstract class Entity extends Identifiable
 	/** The sprite which contains the image for the entity.*/
 	private Sprite sprite;
 	
+	/** The GameMap that holds all created entities*/
+	private static GameMap<Entity> allEntities=new GameMap<Entity>();
 	
+	public static final long serialVersionUID = 3485620223595433434L;
 }

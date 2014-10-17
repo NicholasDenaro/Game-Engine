@@ -64,7 +64,7 @@ public class Location extends Identifiable implements EntityListener
 			entitiesByDepth.put(entity.depth(), new ArrayList<Entity>());
 		if(!entitiesByDepth.get(entity.depth()).contains(entity))
 		{
-			System.out.println("adding entity----------------------");
+			//System.out.println("adding entity----------------------");
 			entitiesByDepth.get(entity.depth()).add(entity);
 			entity.addListener(this);
 		}
@@ -296,7 +296,15 @@ public class Location extends Identifiable implements EntityListener
 				for(int a=0;a<size;a++)
 				{
 					Entity e=(Entity)in.readObject();
-					entities.add(e);
+					Entity actual=Entity.entity(e.id());
+					actual.move(e.lastX(),e.lastY());
+					actual.move(e.x(),e.y());
+					actual.imageIndex(e.imageIndex());
+					actual.depth(e.lastDepth());
+					actual.depth(e.depth());
+					actual.offset(e.offset().x,e.offset().y);
+					actual.mask(new Area(e.mask()));
+					entities.add(actual);
 				}
 				entitiesByDepth.put(key,entities);
 				

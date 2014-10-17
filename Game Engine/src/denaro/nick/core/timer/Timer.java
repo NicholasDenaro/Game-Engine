@@ -1,16 +1,16 @@
 package denaro.nick.core.timer;
 
-public abstract class Timer
+public abstract class Timer extends Thread
 {
 	/**
 	 * Creates a new instance of this timer and calls init
-	 * @param time - the amount of time this should last for
+	 * @param time - the amount of time (in milliseconds) this should wait before performing the action
 	 * @param active - true if it should perform the action at every tick
 	 */
-	public Timer(int time, boolean active)
+	public Timer(int time)
 	{
 		this.time=time;
-		this.active=active;
+		finished=false;
 		init();
 	}
 	
@@ -23,19 +23,53 @@ public abstract class Timer
 	}
 	
 	/**
-	 * The action to be performed at the end of the timer, or if active at every tick
+	 * Check if the Timer is finished
+	 * @return true if the timer is finished
+	 */
+	public boolean isFinished()
+	{
+		return(finished);
+	}
+	
+	/**
+	 * Sets the finished field to true
+	 */
+	protected void finish()
+	{
+		finished=true;
+	}
+	
+	@Override
+	public void start()
+	{
+		startTime=System.currentTimeMillis();
+		super.start();
+	}
+	
+	@Override
+	public void run()
+	{
+		while(System.currentTimeMillis()-startTime<time)
+		{
+			try
+			{
+				sleep((time-(System.currentTimeMillis()-startTime))*4/5);
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		action();
+		finished=true;
+	}
+	
+	/**
+	 * The action to be performed at the end of the timer
 	 */
 	public abstract void action();
 	
-	/**
-	 * The accessor method for active
-	 * @return - true if the Timer is an active timer
-	 */
-	public boolean active()
-	{
-		return(active);
-	}
-	
-	private boolean active;
 	protected int time;
+	private boolean finished;
+	private long startTime;
 }

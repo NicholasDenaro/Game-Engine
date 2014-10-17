@@ -100,6 +100,15 @@ public class Sprite extends Identifiable
 	}
 	
 	/**
+	 * The accessor for name
+	 * @return - the name of the sprite
+	 */
+	public String name()
+	{
+		return(name);
+	}
+	
+	/**
 	 * The accessor for width
 	 * @return - the width of each subimage
 	 */

@@ -8,6 +8,7 @@ import denaro.nick.core.controller.ControllerEvent;
 import denaro.nick.core.controller.ControllerListener;
 import denaro.nick.core.entity.Entity;
 import denaro.nick.core.timer.TickingTimer;
+import denaro.nick.core.timer.Timer;
 import denaro.nick.core.view.GameView;
 import denaro.nick.core.view.GameViewListener;
 
@@ -28,46 +29,88 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 		timers=new ArrayList<TickingTimer>();
 	}
 	
+	/**
+	 * Start the engine
+	 */
 	public void start()
 	{
 		type.start();
 	}
 	
+	/**
+	 * Stop the engine
+	 */
 	public void stop()
 	{
 		type.stopRunning();
 	}
 	
+	/**
+	 * This doesn't do anything right now...?
+	 */
 	public void kill()
 	{
 		//TODO this is the end of the engine
 	}
 	
+	/**
+	 * Set's the controller and calls the controller's init method
+	 * @param controller - the controller to set as the controller
+	 */
 	public void controller(Controller controller)
 	{
 		controller.init(this);
 	}
 	
+	/**
+	 * Adds a TickingTimer to the engine
+	 * @param timer - the timer to be added
+	 */
+	public void addTimer(TickingTimer timer)
+	{
+		timers.add(timer);
+	}
+	
+	/**
+	 * Checks if there are any engineActions in the list
+	 * @return - true if there are actions in the list
+	 */
 	public boolean hasActions()
 	{
 		return(!actions.isEmpty());
 	}
 	
+	/**
+	 * Adds an EngineAction to the stack
+	 * @param action - the action to add
+	 */
 	public void addAction(EngineAction action)
 	{
 		actions.add(action);
 	}
 	
+	/**
+	 * Pushes an EngineAction to the front of the stack
+	 * @param action - the action to push
+	 */
 	public void pushAction(EngineAction action)
 	{
 		actions.push(action);
 	}
 	
+	/**
+	 * Look at the first action without removing it from the stack
+	 * @return - the EngineAction at the front of the stack
+	 */
 	public EngineAction peekAction()
 	{
 		return(actions.peek());
 	}
 	
+	/**
+	 * Gets the first EngineAction on the stack
+	 * @return - the first EngineAction
+	 */
 	public EngineAction popAction()
 	{
 		return(actions.pop());
@@ -279,11 +322,22 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 			listener.viewChanged(view);
 	}
 	
+	/**
+	 * Returns the singleton instance of GameEngine
+	 * @return
+	 */
 	public static GameEngine instance()
 	{
 		return(engine);
 	}
 	
+	/**
+	 * Initialize the singleton instance of GameEngine
+	 * @param type - the way the GameEngine ticks
+	 * @param force - If true, stops the previous engine and assigns a new type
+	 * @return
+	 * @throws GameEngineException
+	 */
 	public static GameEngine instance(EngineType type, boolean force) throws GameEngineException
 	{
 		if(engine==null)
@@ -317,7 +371,9 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 							//who cares?!
 						}
 					};
-					engine=new GameEngine(type);
+					//engine=new GameEngine(type);
+					//type.setEngine(engine);
+					engine.type=type;
 					type.setEngine(engine);
 					return(engine);
 				}
@@ -354,12 +410,18 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	/** Listeners of views*/
 	private ArrayList<GameViewListener> gameViewListeners;
 	
+	/** The type of ticks the engine does*/
 	private EngineType type;
 	
+	/** The TickingTimers that are called every tick*/
 	private ArrayList<TickingTimer> timers;
 	
+	/** The queue to add entities to the location*/
 	private ArrayList<Pair<Entity,Location>> entityAddQueue;
+	
+	/** The queue to remove entities from a location*/
 	private ArrayList<Pair<Entity,Location>> entityRemoveQueue;
 	
+	/** The queue to send controller events to the currently focused focusable*/
 	private ArrayList<Pair<ControllerListener,ControllerEvent>> inputEventQueue;
 }
