@@ -2,16 +2,22 @@ package denaro.nick.core.controller;
 
 public class ControllerEvent
 {
-	public ControllerEvent(int action, int code)
+	public ControllerEvent(Controller controller, int action, int code)
 	{
-		this(action,code,1);
+		this(controller,action,code,1);
 	}
 	
-	public ControllerEvent(int action, int code, float modifier)
+	public ControllerEvent(Controller controller, int action, int code, float modifier)
 	{
+		this.controller=controller;
 		this.action=action;
 		this.code=code;
 		this.modifier=modifier;
+	}
+	
+	public Controller source()
+	{
+		return(controller);
 	}
 	
 	/**
@@ -32,6 +38,8 @@ public class ControllerEvent
 	{
 		return(modifier);
 	}
+	
+	private Controller controller;
 	
 	private int action;
 	

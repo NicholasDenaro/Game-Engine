@@ -159,7 +159,7 @@ public abstract class Entity extends Identifiable
 	}
 	
 	/**
-	 * Returns the direction from this entity to the other
+	 * Returns the direction(in radians) from this entity to the other
 	 * @param other - the entity to check against
 	 * @return - the direction from this entity to the other
 	 */
@@ -425,7 +425,10 @@ public abstract class Entity extends Identifiable
 		out.writeInt(depth);
 		out.writeObject(mask);
 		//out.writeObject(sprite);
-		out.writeObject(sprite.name());
+		if(sprite!=null)
+			out.writeObject(sprite.name());
+		else
+			out.writeObject("NULL");
 	}
 	
 	/**

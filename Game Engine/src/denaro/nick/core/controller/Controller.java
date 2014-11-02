@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import denaro.nick.core.GameEngine;
+import denaro.nick.core.Identifiable;
 
-public abstract class Controller
+public abstract class Controller extends Identifiable
 {
 	/**
 	 * Constructs a controller with specified engine.

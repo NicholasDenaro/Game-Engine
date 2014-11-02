@@ -303,6 +303,7 @@ public class Location extends Identifiable implements EntityListener
 					actual.depth(e.lastDepth());
 					actual.depth(e.depth());
 					actual.offset(e.offset().x,e.offset().y);
+					System.out.println("e.mask(): "+e.mask());
 					actual.mask(new Area(e.mask()));
 					entities.add(actual);
 				}

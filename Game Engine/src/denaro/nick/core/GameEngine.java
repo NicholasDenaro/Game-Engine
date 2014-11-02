@@ -59,6 +59,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	 */
 	public void controller(Controller controller)
 	{
+		controllers.add(controller);
 		controller.init(this);
 	}
 	
@@ -120,11 +121,23 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	public void actionPerformed(ControllerEvent event)
 	{
 		// TODO make sure this works
-		if(currentFocus()!=null)
+		/*if(currentFocus()!=null)
 			if(currentFocus() instanceof ControllerListener)
 			{
 				inputEventQueue.add(new Pair<ControllerListener,ControllerEvent>((ControllerListener)this.currentFocus(),event));
 			}
+		//*/
+		for(int i=0;i<currentFocus.size();i++)
+		{
+			if(event.source().id()==i)
+			{
+				Focusable focus=currentFocus.get(i);
+				if(focus instanceof ControllerListener)
+				{
+					inputEventQueue.add(new Pair<ControllerListener,ControllerEvent>((ControllerListener)focus,event));
+				}
+			}
+		}
 	}
 	
 	public void tick()
@@ -246,19 +259,22 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	 * The accessor for the current focus
 	 * @return - the current focus
 	 */
-	public Focusable currentFocus()
+	public Focusable currentFocus(int index)
 	{
-		return(currentFocus);
+		return(currentFocus.get(index));
 	}
 	
 	/**
 	 * Shifts the focus to the specified focusable object
 	 * @param focusable - the focusable to shift focus to
 	 */
-	public void requestFocus(Focusable focusable)
+	public void requestFocus(int index, Focusable focusable)
 	{
 		//TODO Make this check if it should change focus.
-		currentFocus=focusable;
+		if(index>=currentFocus.size())
+			currentFocus.add(focusable);
+		else
+			currentFocus.set(index,focusable);
 	}
 	
 	/**
@@ -402,7 +418,9 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	private ArrayList<ControllerListener> controllerListeners=new ArrayList<ControllerListener>();
 	
 	/** The current KeyListener that has focus*/
-	private Focusable currentFocus;
+	private ArrayList<Focusable> currentFocus=new ArrayList<Focusable>();
+	
+	private GameMap<Controller> controllers=new GameMap<Controller>();
 	
 	/** A list of the actions to be taken by the engine*/
 	private LinkedList<EngineAction> actions=new LinkedList<EngineAction>();
