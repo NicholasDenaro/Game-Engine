@@ -169,6 +169,16 @@ public abstract class Entity extends Identifiable
 	}
 	
 	/**
+	 * Returns the direction(in radians) from this entity to the other
+	 * @param other - the point to check against
+	 * @return - the direction from this entity to the other
+	 */
+	public double direction(Point other)
+	{
+		return(Math.atan2(other.y-this.y,other.x-this.x));
+	}
+	
+	/**
 	 * Returns the image that represents the entity
 	 * @return - the image that currently represents the entity. If no sprite, returns null
 	 */

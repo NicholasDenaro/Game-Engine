@@ -30,6 +30,7 @@ public class FixedTickType extends EngineType
 		
 
 		//try
+		while(!isKilled())
 		{
 			while(running())
 			{
@@ -77,6 +78,15 @@ public class FixedTickType extends EngineType
 			e.printStackTrace();
 			running=false;
 		}*/
+	}
+	
+	/**
+	 * Accessor method for the number of ticks each second
+	 * @return - the number of ticks per second
+	 */
+	public int ticksPerSecond()
+	{
+		return(ticksPerSecond);
 	}
 	
 	@Override

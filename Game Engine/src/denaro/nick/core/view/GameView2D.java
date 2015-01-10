@@ -135,7 +135,7 @@ public class GameView2D extends GameView
 	 * @param set2 - the second set to merge
 	 * @return - a merge of set1 and set2, excluding duplicates
 	 */
-	private Set<Integer> mergeKeys(Set<Integer> set1, Set<Integer> set2)
+	protected Set<Integer> mergeKeys(Set<Integer> set1, Set<Integer> set2)
 	{
 		TreeSet<Integer> mergedSet=new TreeSet<Integer>(set1);
 		mergedSet.addAll(set2);

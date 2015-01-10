@@ -13,11 +13,6 @@ public abstract class EngineType extends Thread
 		super.start();
 	}
 	
-	public void stopRunning()
-	{
-		running=false;
-	}
-	
 	public void setEngine(GameEngine engine)
 	{
 		this.engine=engine;
@@ -33,11 +28,22 @@ public abstract class EngineType extends Thread
 		return(running);
 	}
 	
+	protected void kill()
+	{
+		kill=true;
+	}
+	
+	public boolean isKilled()
+	{
+		return(kill);
+	}
+	
 	protected void running(boolean running)
 	{
 		this.running=running;
 	}
 	
+	private boolean kill;
 	private boolean running;
 	private GameEngine engine;
 }

@@ -69,6 +69,15 @@ public class FixedFPSType extends EngineType
 		engine().kill();
 	}
 	
+	/**
+	 * Accessor method for the number of ticks each second
+	 * @return - the number of ticks per second
+	 */
+	public int ticksPerSecond()
+	{
+		return(ticksPerSecond);
+	}
+	
 	@Override
 	public ArrayList<String> information()
 	{
