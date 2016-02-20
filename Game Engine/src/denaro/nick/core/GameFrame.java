@@ -29,6 +29,8 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 		//this.addKeyListener(engine);
 		this.addFocusListener(this);
 		
+		engine.addGameViewListener(this);
+		
 		buildFrame(engine);
 	}
 	

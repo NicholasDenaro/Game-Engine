@@ -114,6 +114,8 @@ public class Location extends Identifiable implements EntityListener
 	public ArrayList<Entity> entityList(Class c)
 	{
 		ArrayList<Entity> allEntities=new ArrayList<Entity>();
+		if(entitiesByDepth==null)
+			return(allEntities);
 		for(Integer key:entitiesByDepth.keySet())
 		{
 			ArrayList<Entity> entities=entitiesByDepth.get(key);
@@ -130,14 +132,15 @@ public class Location extends Identifiable implements EntityListener
 	
 	/**
 	 * The accessor for the entities at a specified point of the specified class in this locaiton
+	 * @param <T> - the class of the entity to get
 	 * @param x - the horizontal position to check at.
 	 * @param y - the vertical position to check at.
 	 * @param c - the class of the entity to add to the list.
 	 * @return - all of the entities in this Location
 	 */
-	public ArrayList<Entity> entitiesAtPoint(double x, double y, Class c)
+	public <T> ArrayList<T> entitiesAtPoint(double x, double y, Class<T> c)
 	{
-		ArrayList<Entity> allEntities=new ArrayList<Entity>();
+		ArrayList<T> allEntities=new ArrayList<T>();
 		for(Integer key:entitiesByDepth.keySet())
 		{
 			ArrayList<Entity> entities=entitiesByDepth.get(key);
@@ -148,7 +151,7 @@ public class Location extends Identifiable implements EntityListener
 				if(temp.contains(x,y))
 				{
 					if(c.isAssignableFrom(entity.getClass()))
-						allEntities.add(entity);
+						allEntities.add((T)entity);
 				}
 			}
 		}

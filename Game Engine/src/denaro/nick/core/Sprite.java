@@ -55,6 +55,15 @@ public class Sprite extends Identifiable
 	}
 	
 	/**
+	 * Sets how many horizontal subimages there are.
+	 * @param hSubimages - the number of horizontal subimages
+	 */
+	public void hSubimages(int hSubimages)
+	{
+		this.hSubimages=hSubimages;
+	}
+	
+	/**
 	 * The accessor for this sprite's anchor
 	 * @return - a point representing the anchor
 	 */

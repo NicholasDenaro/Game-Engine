@@ -27,7 +27,9 @@ public abstract class Controller extends Identifiable
 	public void actionPerformed(ControllerEvent event)
 	{
 		for(ControllerListener listener:listeners)
+		{
 			listener.actionPerformed(event);
+		}
 	}
 	
 	/**

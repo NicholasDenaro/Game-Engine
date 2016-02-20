@@ -18,6 +18,18 @@ public class Pair<T,R>
 		return(r);
 	}
 	
+	@Override
+	public boolean equals(Object other)
+	{
+		if(other instanceof Pair==false)
+			return(false);
+		else
+		{
+			Pair otherPair=(Pair)other;
+			return(t==otherPair.t&&r==otherPair.r);
+		}
+	}
+	
 	private T t;
 	private R r;
 }

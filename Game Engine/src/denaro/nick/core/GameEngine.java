@@ -150,6 +150,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 		//*/
 		for(int i=0;i<currentFocus.size();i++)
 		{
+			
 			if(event.source().id()==i)
 			{
 				Focusable focus=currentFocus.get(i);
@@ -237,9 +238,13 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 			for(Pair<Integer,Focusable> pair:clone)
 			{
 				if(currentFocus.containsKey(pair.first()))
-					currentFocus.get(pair.first()).focusLost();
+				{
+					if(currentFocus.get(pair.first())!=null)
+						currentFocus.get(pair.first()).focusLost();
+				}
 				currentFocus.put(pair.first(),pair.second());
-				currentFocus.get(pair.first()).focusGained();
+				if(currentFocus.get(pair.first())!=null)
+					currentFocus.get(pair.first()).focusGained();
 			}
 			focusQueue.clear();
 		}
@@ -257,13 +262,17 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	/**
 	 * Adds an entity to the specified location
 	 * @param entity - the entity to add
-	 * @param location - the location at which to add the entity
+	 * @param location - the location at which to add the entity. If null, uses currentLocation.
 	 * @throws LocationAddEntityException 
 	 */
 	public void addEntity(Entity entity, Location location)// throws LocationAddEntityException
 	{
 		//location.addEntity(entity);
-		entityAddQueue.add(new Pair(entity,location));
+		if(location!=null)
+			entityAddQueue.add(new Pair(entity,location));
+		else
+			entityAddQueue.add(new Pair(entity,currentLocation));
+			 
 	}
 	
 	/**
@@ -335,7 +344,10 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	 */
 	public void removeEntity(Entity entity,Location location)
 	{
-		entityRemoveQueue.add(new Pair(entity,location));
+		if(location!=null)
+			entityRemoveQueue.add(new Pair(entity,location));
+		else
+			entityRemoveQueue.add(new Pair(entity,currentLocation));
 	}
 	
 	/**
