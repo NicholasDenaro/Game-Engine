@@ -1,6 +1,7 @@
 package denaro.nick.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import denaro.nick.core.controller.Controller;
@@ -26,7 +27,14 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 		
 		inputEventQueue=new ArrayList<Pair<ControllerListener, ControllerEvent>>();
 		
+		focusQueue=new ArrayList<Pair<Integer,Focusable>>();
+		
 		timers=new ArrayList<TickingTimer>();
+		
+		if(type instanceof FixedTickType)
+			ticksPerSecond=((FixedTickType)type).ticksPerSecond();
+		if(type instanceof FixedFPSType)
+			ticksPerSecond=((FixedFPSType)type).ticksPerSecond();
 	}
 	
 	/**
@@ -42,15 +50,28 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	 */
 	public void stop()
 	{
-		type.stopRunning();
+		type.running(false);
 	}
 	
 	/**
-	 * This doesn't do anything right now...?
+	 * Resume the engine
+	 */
+	public void resume()
+	{
+		type.running(true);
+	}
+	
+	/**
+	 * This kills the engine
 	 */
 	public void kill()
 	{
-		//TODO this is the end of the engine
+		type.kill();
+	}
+	
+	public int ticksPerSecond()
+	{
+		return(ticksPerSecond);
 	}
 	
 	/**
@@ -209,6 +230,19 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 			}
 			entityRemoveQueue.clear();
 		}
+		
+		if(!focusQueue.isEmpty())
+		{
+			ArrayList<Pair<Integer,Focusable>> clone=(ArrayList<Pair<Integer,Focusable>>)focusQueue.clone();
+			for(Pair<Integer,Focusable> pair:clone)
+			{
+				if(currentFocus.containsKey(pair.first()))
+					currentFocus.get(pair.first()).focusLost();
+				currentFocus.put(pair.first(),pair.second());
+				currentFocus.get(pair.first()).focusGained();
+			}
+			focusQueue.clear();
+		}
 	}
 	
 	public void redraw()
@@ -257,6 +291,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	
 	/**
 	 * The accessor for the current focus
+	 * @param index - the index of the focus (There can be multiple focused things for different controllers).
 	 * @return - the current focus
 	 */
 	public Focusable currentFocus(int index)
@@ -266,15 +301,31 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	
 	/**
 	 * Shifts the focus to the specified focusable object
+	 * @param index - the index at which to request the focus. Basically the controller that will hold the focus.
 	 * @param focusable - the focusable to shift focus to
 	 */
-	public void requestFocus(int index, Focusable focusable)
+	public void requestFocus(int index, Focusable focusable) throws IndexOutOfBoundsException
 	{
 		//TODO Make this check if it should change focus.
-		if(index>=currentFocus.size())
-			currentFocus.add(focusable);
-		else
-			currentFocus.set(index,focusable);
+		if(index>controllers.size())
+			throw new IndexOutOfBoundsException("The index is out of bounds!");
+		
+		focusQueue.add(new Pair<Integer,Focusable>(index,focusable));
+		
+		/*if(currentFocus.containsKey(index))
+			currentFocus.get(index).focusLost();
+		currentFocus.put(index,focusable);
+		currentFocus.get(index).focusGained();*/
+	}
+	
+	@Override
+	public void focusGained()
+	{
+	}
+
+	@Override
+	public void focusLost()
+	{
 	}
 	
 	/**
@@ -418,7 +469,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	private ArrayList<ControllerListener> controllerListeners=new ArrayList<ControllerListener>();
 	
 	/** The current KeyListener that has focus*/
-	private ArrayList<Focusable> currentFocus=new ArrayList<Focusable>();
+	private HashMap<Integer,Focusable> currentFocus=new HashMap<Integer,Focusable>();
 	
 	private GameMap<Controller> controllers=new GameMap<Controller>();
 	
@@ -431,6 +482,9 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	/** The type of ticks the engine does*/
 	private EngineType type;
 	
+	/** The number of ticks per second*/
+	private int ticksPerSecond;
+	
 	/** The TickingTimers that are called every tick*/
 	private ArrayList<TickingTimer> timers;
 	
@@ -442,4 +496,6 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	
 	/** The queue to send controller events to the currently focused focusable*/
 	private ArrayList<Pair<ControllerListener,ControllerEvent>> inputEventQueue;
+	
+	private ArrayList<Pair<Integer,Focusable>> focusQueue;
 }

@@ -12,8 +12,11 @@ import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -28,7 +31,11 @@ import denaro.nick.core.Location;
 import denaro.nick.core.LocationAddEntityException;
 import denaro.nick.core.Sprite;
 import denaro.nick.core.entity.Entity;
+import denaro.nick.core.timer.TickingTimer;
+import denaro.nick.core.timer.Timer;
 import denaro.nick.core.view.GameView2D;
+import denaro.nick.sound.BGMusic;
+import denaro.nick.sound.GameSound;
 
 public class Main
 {
@@ -121,6 +128,47 @@ public class Main
 		
 		Entity orbital2=new Orbital(cyanBall,new Point.Double(60,95),3,new Point.Double(0,0.99));
 		engine.addEntity(orbital2,testRoom);
+		
+		try
+		{
+			BGMusic m = new BGMusic("spacey","M:\\users\\nicholas\\desktop\\splice.wav", 0, 500000);
+			m.startLoop();
+			
+			new GameSound("woosh","M:\\users\\nicholas\\desktop\\Oracle_WaterFlow1.wav");
+			new GameSound("switch","M:\\users\\nicholas\\desktop\\Oracle_Switch.wav");
+			
+			TickingTimer t = new TickingTimer(60*3, false)
+			{
+
+				@Override
+				public void action()
+				{
+					System.out.println(".");
+					GameSound.gameSounds.get("switch").play();
+				}
+				
+			};
+			//t.start();
+			TickingTimer t2 = new TickingTimer(60*3, false)
+			{
+
+				@Override
+				public void action()
+				{
+					System.out.println("~");
+					GameSound.gameSounds.get("woosh").play();
+				}
+				
+			};
+			//t2.start();
+			GameEngine.instance().addTimer(t);
+			GameEngine.instance().addTimer(t2);
+		}
+		catch(UnsupportedAudioFileException | IOException
+				| LineUnavailableException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
 
@@ -159,7 +207,7 @@ class Orbital extends Entity
 		}
 		acceleration=new Point.Double(0,0);
 		
-		for(int i=0;i<10000;i++)
+		for(int i=0;i<10000;i++) // why is this here?
 		{
 			//System.out.format("","");//this lags the game
 		}

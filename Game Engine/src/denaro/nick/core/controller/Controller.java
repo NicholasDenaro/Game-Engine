@@ -15,6 +15,7 @@ public abstract class Controller extends Identifiable
 	public Controller()
 	{
 		listeners=new ArrayList<ControllerListener>();
+		createDefaultKeymap();
 	}
 	
 	public abstract boolean init(GameEngine engine);

@@ -2,6 +2,8 @@ package denaro.nick.core;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -48,6 +50,10 @@ public class GameFrame extends JFrame implements FocusListener, GameViewListener
 		currentPanel.requestFocusInWindow();
 		
 		pack();
+		setVisible(true);
+		
+		Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setLocation(size.width/2-this.getWidth()/2, size.height/2-this.getHeight()/2);
 	}
 	
 	@Override
