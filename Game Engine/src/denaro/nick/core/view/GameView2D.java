@@ -1,7 +1,5 @@
 package denaro.nick.core.view;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -17,6 +15,8 @@ import denaro.nick.core.entity.Entity;
 
 public class GameView2D extends GameView
 {
+	private static final long serialVersionUID=1L;
+	
 	public GameView2D(int width, int height, double hscale, double vscale)
 	{
 		this.width=width;
@@ -111,13 +111,17 @@ public class GameView2D extends GameView
 	public void redraw()
 	{
 		GameEngine engine=GameEngine.instance();
-		if(buffer==null)
-			if(getWidth()>0)
-				buffer=new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_ARGB);
+		if(buffer==null && getWidth()>0)
+		{
+			buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+		}
+		
 		if(buffer==null)return;
-		Graphics2D g=buffer.createGraphics();
-		g.scale(horizontalScale,verticalScale);
-		Location currentLocation=engine.location();
+		
+		Graphics2D g = buffer.createGraphics();
+		g.scale(horizontalScale, verticalScale);
+		Location currentLocation = engine.location();
+		
 		if(currentLocation!=null)
 		{
 			drawLocation(currentLocation,g);

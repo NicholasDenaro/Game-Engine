@@ -201,7 +201,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 				popAction();
 		}
 		
-		//entity adding/deleting
+		//entity adding
 		if(!entityAddQueue.isEmpty())
 		{
 			ArrayList<Pair<Entity,Location>> clone=(ArrayList<Pair<Entity,Location>>)entityAddQueue.clone();
@@ -222,6 +222,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 			entityAddQueue.clear();
 		}
 		
+		//entity deleting
 		if(!entityRemoveQueue.isEmpty())
 		{
 			ArrayList<Pair<Entity,Location>> clone=(ArrayList<Pair<Entity,Location>>)entityRemoveQueue.clone();
@@ -232,6 +233,7 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 			entityRemoveQueue.clear();
 		}
 		
+		//focus controll
 		if(!focusQueue.isEmpty())
 		{
 			ArrayList<Pair<Integer,Focusable>> clone=(ArrayList<Pair<Integer,Focusable>>)focusQueue.clone();
@@ -269,9 +271,9 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	{
 		//location.addEntity(entity);
 		if(location!=null)
-			entityAddQueue.add(new Pair(entity,location));
+			entityAddQueue.add(new Pair<Entity,Location>(entity,location));
 		else
-			entityAddQueue.add(new Pair(entity,currentLocation));
+			entityAddQueue.add(new Pair<Entity,Location>(entity,currentLocation));
 			 
 	}
 	
@@ -408,6 +410,18 @@ public class GameEngine/* extends Thread*/ implements ControllerListener
 	public static GameEngine instance()
 	{
 		return(engine);
+	}
+	
+	/**
+	 * Initialize the singleton instance of GameEngine
+	 * @param type - the way the GameEngine ticks
+	 * @param force - If true, stops the previous engine and assigns a new type
+	 * @return
+	 * @throws GameEngineException
+	 */
+	public static GameEngine instance(EngineType type) throws GameEngineException
+	{
+		return instance(type, false);
 	}
 	
 	/**

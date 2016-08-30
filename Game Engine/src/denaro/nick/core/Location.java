@@ -93,7 +93,7 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	/**
-	 * The accessor for the entities in this locaiton
+	 * The accessor for the entities in this location
 	 * @return - all of the entities in this Location
 	 */
 	public ArrayList<Entity> entityList()
@@ -107,7 +107,7 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	/**
-	 * The accessor for the entities of the specified class in this locaiton
+	 * The accessor for the entities of the specified class in this location
 	 * @param c - the class of the entity to add to the list.
 	 * @return - all of the entities in this Location
 	 */
@@ -131,7 +131,7 @@ public class Location extends Identifiable implements EntityListener
 	}
 	
 	/**
-	 * The accessor for the entities at a specified point of the specified class in this locaiton
+	 * The accessor for the entities at a specified point of the specified class in this location
 	 * @param <T> - the class of the entity to get
 	 * @param x - the horizontal position to check at.
 	 * @param y - the vertical position to check at.

@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Identifiable implements Serializable
 {
+	private static final long serialVersionUID=1L;
+
 	/**
 	 * The accessor for id;
 	 * @return - the id.

@@ -4,10 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics2D;
-import java.awt.Panel;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
@@ -17,26 +14,24 @@ import java.util.ArrayList;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import denaro.nick.core.FixedFPSType;
 import denaro.nick.core.FixedTickType;
 import denaro.nick.core.GameEngine;
 import denaro.nick.core.GameEngineException;
-//import denaro.nick.core.GameEngineFixedFPS;
-//import denaro.nick.core.GameEngineFixedTick;
 import denaro.nick.core.Location;
 import denaro.nick.core.LocationAddEntityException;
+import denaro.nick.core.Point;
 import denaro.nick.core.Sprite;
+import denaro.nick.core.Vector;
 import denaro.nick.core.entity.Entity;
 import denaro.nick.core.timer.TickingTimer;
-import denaro.nick.core.timer.Timer;
 import denaro.nick.core.view.GameView2D;
 import denaro.nick.sound.BGMusic;
 import denaro.nick.sound.GameSound;
 
+@SuppressWarnings("unused")
 public class Main
 {
 	
@@ -110,23 +105,23 @@ public class Main
 		g.fillOval(0,0,20,20);
 		Sprite cyanBall=new Sprite("Earth",img,20,20,new Point(10,10));
 		
-		Entity sun=new Orbital(orangeBall,new Point.Double(160,160),100,new Point.Double(0,0));
+		Entity sun=new Orbital(orangeBall,new Point(160,160),100,new Vector(0,0));
 		engine.addEntity(sun,testRoom);
 		
-		Entity orbital1=new Orbital(redBall,new Point.Double(112,80),1,new Point.Double(0,1.5));
+		Entity orbital1=new Orbital(redBall,new Point(112,80),1,new Vector(0,1.5));
 		engine.addEntity(orbital1,testRoom);
 		
-		orbital1=new Orbital(redBall,new Point.Double(112,96),1,new Point.Double(0,1.8));
+		orbital1=new Orbital(redBall,new Point(112,96),1,new Vector(0,1.8));
 		engine.addEntity(orbital1,testRoom);
 		
-		orbital1=new Orbital(redBall,new Point.Double(192,93),1,new Point.Double(0,0.89));
+		orbital1=new Orbital(redBall,new Point(192,93),1,new Vector(0,0.89));
 		engine.addEntity(orbital1,testRoom);
 		
-		orbital1=new Orbital(redBall,new Point.Double(150,50),1,new Point.Double(-0.8,0.2));
+		orbital1=new Orbital(redBall,new Point(150,50),1,new Vector(-0.8,0.2));
 		engine.addEntity(orbital1,testRoom);
 
 		
-		Entity orbital2=new Orbital(cyanBall,new Point.Double(60,95),3,new Point.Double(0,0.99));
+		Entity orbital2=new Orbital(cyanBall,new Point(60,95),3,new Vector(0,0.99));
 		engine.addEntity(orbital2,testRoom);
 		
 		try
@@ -175,13 +170,13 @@ public class Main
 
 class Orbital extends Entity
 {
-	public Orbital(Sprite sprite, Double point, double mass, Point.Double velocity)
+	public Orbital(Sprite sprite, Point point, double mass, Vector velocity)
 	{
 		super(sprite,point.x,point.y);
 		this.mass=mass;
-		this.center=new Point.Double(point.x,point.y);
+		this.center=new Point(point.x,point.y);
 		this.velocity=velocity;
-		this.acceleration=new Point.Double(0,0);
+		this.acceleration=new Vector(0,0);
 	}
 	
 	@Override
@@ -205,7 +200,7 @@ class Orbital extends Entity
 		{
 			moveDelta(velocity.x,velocity.y);
 		}
-		acceleration=new Point.Double(0,0);
+		acceleration=new Vector(0,0);
 		
 		for(int i=0;i<10000;i++) // why is this here?
 		{
@@ -214,10 +209,10 @@ class Orbital extends Entity
 	}
 	
 	private double theta; 
-	private Point.Double center;
+	private Point center;
 	private double mass;
-	private Point.Double velocity;
-	private Point.Double acceleration;
+	private Vector velocity;
+	private Vector acceleration;
 	
 	//public static double G=6.67384*Math.pow(10,-11);
 	public static double G=1;

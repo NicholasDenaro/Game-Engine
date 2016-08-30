@@ -15,6 +15,8 @@ import denaro.nick.core.view.GameViewListener;
 
 public class GameFrame extends JFrame implements FocusListener, GameViewListener
 {
+	private static final long serialVersionUID=1L;
+
 	/**
 	 * Creates a new JFrame with a specified title
 	 * @param title - the title to set the frame

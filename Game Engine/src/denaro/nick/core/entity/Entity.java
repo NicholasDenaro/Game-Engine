@@ -1,14 +1,10 @@
 package denaro.nick.core.entity;
 
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -18,7 +14,9 @@ import java.util.ArrayList;
 
 import denaro.nick.core.GameMap;
 import denaro.nick.core.Identifiable;
+import denaro.nick.core.Point;
 import denaro.nick.core.Sprite;
+import denaro.nick.core.Vector;
 
 public abstract class Entity extends Identifiable
 {
@@ -47,7 +45,7 @@ public abstract class Entity extends Identifiable
 		this.lastDepth=this.depth;
 		this.listeners=new ArrayList<EntityListener>();
 		this.imageIndex=0;
-		this.offset=new Point.Double(0,0);
+		this.offset=new Point(0,0);
 		//This is so each entity gets a unique id!
 		allEntities.add(this);
 	}
@@ -70,7 +68,7 @@ public abstract class Entity extends Identifiable
 	 * @param other - the area to check a collision with
 	 * @return - true if the sprites boundaries overlap
 	 */
-	public boolean collision(Point.Double loc, Area other)
+	public boolean collision(Point loc, Area other)
 	{
 		AffineTransform af=new AffineTransform();
 		if(loc!=null)
@@ -93,7 +91,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public boolean collision(double x, double y, Entity other)
 	{
-		Point.Double loc=new Point.Double(x,y);
+		Point loc=new Point(x,y);
 		/*AffineTransform af=new AffineTransform();
 		if(loc!=null)
 			af.translate(loc.x,loc.y);
@@ -269,14 +267,14 @@ public abstract class Entity extends Identifiable
 	 */
 	public void move(double x, double y)
 	{
-		move(new Point.Double(x,y));
+		move(new Point(x,y));
 	}
 	
 	/**
 	 * Moves the player to the location p
 	 * @param p - the location to move to
 	 */
-	private void move(Point.Double p)
+	private void move(Point p)
 	{
 		lastX=x;
 		lastY=y;
@@ -294,9 +292,20 @@ public abstract class Entity extends Identifiable
 	 * Shifts the location of the player by p
 	 * @param p - the change in position
 	 */
-	private void moveDelta(Point.Double p)
+	@Deprecated
+	private void moveDelta(Point p)
 	{
-		Point.Double to=new Point.Double(this.x+p.x,this.y+p.y);
+		Point to=new Point(this.x+p.x,this.y+p.y);
+		move(to);
+	}
+	
+	/**
+	 * Shifts the location of the player by p
+	 * @param p - the change in position
+	 */
+	public void moveDelta(Vector p)
+	{
+		Point to=new Point(this.x+p.x,this.y+p.y);
 		move(to);
 	}
 	
@@ -307,7 +316,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public void moveDelta(double x, double y)
 	{
-		Point.Double to=new Point.Double(this.x+x,this.y+y);
+		Point to=new Point(this.x+x,this.y+y);
 		move(to);
 	}
 	
@@ -315,7 +324,7 @@ public abstract class Entity extends Identifiable
 	 * The accessor for this entity's sprite offset
 	 * @return - a point representing the offset
 	 */
-	public Point.Double offset()
+	public Point offset()
 	{
 		return(offset);
 	}
@@ -327,7 +336,7 @@ public abstract class Entity extends Identifiable
 	 */
 	public void offset(double x, double y)
 	{
-		offset=new Point.Double(x,y);
+		offset=new Point(x,y);
 	}
 	
 	/**
@@ -459,7 +468,7 @@ public abstract class Entity extends Identifiable
 		imageIndex=in.readInt();
 		try
 		{
-			offset=(Point2D.Double)in.readObject();
+			offset=(Point)in.readObject();
 		}
 		catch(ClassNotFoundException e)
 		{
@@ -521,7 +530,7 @@ public abstract class Entity extends Identifiable
 	private int imageIndex;
 	
 	/** The offset at which to draw the image.*/
-	private Point.Double offset;
+	private Point offset;
 	
 	/** The horizontal component of the entity's location*/
 	private double x;

@@ -8,6 +8,8 @@ import denaro.nick.core.Identifiable;
 
 public abstract class Controller extends Identifiable
 {
+	private static final long serialVersionUID=1L;
+
 	/**
 	 * Constructs a controller with specified engine.
 	 * @param engine - the engine this controller sends messages to
