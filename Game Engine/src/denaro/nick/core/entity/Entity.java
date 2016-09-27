@@ -63,6 +63,15 @@ public abstract class Entity extends Identifiable
 	}
 	
 	/**
+	 * Returns the current point of this entity
+	 * @return the point with value x, y
+	 */
+	public Point point()
+	{
+		return new Point(x, y);
+	}
+	
+	/**
 	 * Checks if there is a collision between 2 entities
 	 * @param loc - temporarily moves the entity to this location to check for a collision
 	 * @param other - the area to check a collision with

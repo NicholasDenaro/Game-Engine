@@ -1,6 +1,6 @@
 package denaro.nick.core.entity;
 
-import java.awt.Point;
+import denaro.nick.core.Point;
 
 public class EntityEvent
 {
@@ -17,9 +17,9 @@ public class EntityEvent
 	 * accesses the location the entity moved to
 	 * @return - a point containing the change in location
 	 */
-	public Point.Double movedDelta()
+	public Point movedDelta()
 	{
-		Point.Double delta=new Point.Double(movedTo().x-movedFrom().x,movedTo().y-movedFrom().y);
+		Point delta=new Point(movedTo().x-movedFrom().x,movedTo().y-movedFrom().y);
 		return(delta);
 	}
 	
@@ -27,18 +27,18 @@ public class EntityEvent
 	 * accesses the location the entity moved from
 	 * @return - a point containing the location
 	 */
-	public Point.Double movedFrom()
+	public Point movedFrom()
 	{
-		return(new Point.Double(source.lastX(),source.lastY()));
+		return(new Point(source.lastX(),source.lastY()));
 	}
 	
 	/**
 	 * accesses the location the entity moved to
 	 * @return - a point containing the location
 	 */
-	public Point.Double movedTo()
+	public Point movedTo()
 	{
-		return(new Point.Double(source.x(),source.y()));
+		return(new Point(source.x(),source.y()));
 	}
 	
 	/**

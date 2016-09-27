@@ -50,4 +50,5 @@ public class ControllerEvent
 	public static final int PRESSED=0;
 	public static final int RELEASED=1;
 	public static final int MOVED=2;
+	public static final int HELD=3;
 }
